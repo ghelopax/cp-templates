@@ -18,7 +18,7 @@ using namespace std;
 #define ldb long double
 
 const int maxN = 1e5 + 5;
-const int MOD = 1e9 + 7;
+const ll MOD = 1e9 + 7;
 const int INF = 2e9;
 const ll INFLL = 4e18;
 
