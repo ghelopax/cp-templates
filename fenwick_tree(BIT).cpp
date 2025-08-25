@@ -27,13 +27,14 @@ const ll INFLL = 4e18;
 #define eb emplace_back
 #define MASK(i) (1LL << (i))
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
-#define lowbit(x) ((x) & -(x))
+#define lsb(x) ((x) & -(x))
 
 struct BIT
 {
     int bit[maxN];
+    int N;
 
-    BIT()
+    BIT(int __N) : N(__N)
     {
         memset(bit, 0, sizeof(bit));
     }
@@ -46,10 +47,21 @@ struct BIT
         while (idx > 0)
         {
             sum += bit[idx];
-            idx -= lowbit(idx);
+            idx -= lsb(idx);
         }
 
         return sum;
+    }
+
+    void update(int __idx, int __val)
+    {
+        int idx = __idx;
+
+        while (idx <= N)
+        {
+            bit[idx] += __val;
+            idx += lsb(idx);
+        }
     }
 };
 
