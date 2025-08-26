@@ -21,6 +21,7 @@ const int maxN = 1e5 + 5;
 const int MOD = 1e9 + 7;
 const int INF = 2e9;
 const ll INFLL = 4e18;
+const int LG = 20;
 
 #define el "\n"
 #define pb push_back
@@ -30,24 +31,22 @@ const ll INFLL = 4e18;
 
 struct Sparse_Table
 {
-    static const int LG = 20;
-
     int st[LG + 1][maxN];
     int *pArr;
-    int _N;
+    int N;
 
-    Sparse_Table(int *p, int __N) : pArr(p), _N(__N) {}
+    Sparse_Table(int *p, int _N) : pArr(p), N(_N) {}
 
     void build()
     {
-        for (int i = 1; i <= _N; ++i)
+        for (int i = 1; i <= N; ++i)
         {
             st[0][i] = pArr[i];
         }
 
         for (int j = 1; j <= LG; ++j)
         {
-            for (int i = 1; i + (1 << j) - 1 <= _N; ++i)
+            for (int i = 1; i + (1 << j) - 1 <= N; ++i)
             {
                 st[j][i] = min(st[j - 1][i], st[j - 1][i + (1 << (j - 1))]);
             }
