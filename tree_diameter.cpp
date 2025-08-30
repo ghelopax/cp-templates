@@ -33,7 +33,7 @@ pair<int, int> dmax(vector<int> *_adj, int _N, int s)
 {
     pair<int, int> res = {-1, 0};
 
-    vector<bool> _vst(_N, false);
+    vector<bool> _vst(_N + 1, false);
     queue<pair<int, int>> q;
 
     _vst[s] = true;
