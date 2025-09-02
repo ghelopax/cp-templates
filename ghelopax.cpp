@@ -21,12 +21,14 @@ const int maxN = 1e5 + 5;
 const ll MOD = 1e9 + 7;
 const int INF = 2e9;
 const ll INFLL = 4e18;
+const int LG = 20;
 
 #define el "\n"
 #define pb push_back
 #define eb emplace_back
 #define MASK(i) (1LL << (i))
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
+#define lsb(x) ((x) & -(x))
 
 void input()
 {
