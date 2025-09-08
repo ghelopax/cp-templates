@@ -189,7 +189,7 @@ ll hld_get(int u, int v)
 
     while (chain_id[u] != chain_id[v])
     {
-        if (h[u] > h[v])
+        if (h[chain_head[chain_id[u]]] > h[chain_head[chain_id[v]]])
             swap(u, v);
 
         res += segtree.get(1, 1, n, pos[chain_head[chain_id[v]]], pos[v]);
