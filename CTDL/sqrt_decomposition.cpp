@@ -33,7 +33,7 @@ const int BLOCK_SIZE = 320;
 #define lsb(x) ((x) & -(x))
 #define start_of_block(b) ((b) * BLOCK_SIZE + 1)
 #define end_of_block(b) min(n, ((b) + 1) * BLOCK_SIZE)
-#define block(i) ((i - 1) / BLOCK_SIZE)
+#define block(i) (((i) - 1) / BLOCK_SIZE)
 
 // Mo's Algorithm
 struct query
