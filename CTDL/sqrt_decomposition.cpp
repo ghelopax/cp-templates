@@ -77,12 +77,12 @@ void solve()
     {
         while (L > qr.l)
             add(--L);
+        while (R < qr.r)
+            add(++R);
         while (L < qr.l)
             rem(L++);
         while (R > qr.r)
             rem(R--);
-        while (R < qr.r)
-            add(++R);
 
         // ans[qr.id] = ...
     }
