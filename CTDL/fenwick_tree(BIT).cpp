@@ -29,9 +29,11 @@ const ll INFLL = 4e18;
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
 
+// Fenwick Tree
+int bit[maxN];
+
 struct BIT
 {
-    int bit[maxN];
     int N;
 
     BIT(int __N) : N(__N)

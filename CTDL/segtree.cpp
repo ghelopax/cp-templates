@@ -20,9 +20,11 @@ using namespace std;
 #define maxN (int)(1e5 + 5)
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 
+// Segment_Tree
+int ST[4 * maxN];
+
 struct Segment_Tree
 {
-    int ST[4 * maxN];
     int *pArr;
 
     Segment_Tree(int *p) : pArr(p) {}

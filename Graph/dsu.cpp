@@ -17,9 +17,11 @@ using namespace std;
 #define int long long
 #define maxN (int)(1e5 + 5)
 
+// Disjoint Set Union
+int lab[maxN];
+
 struct DSU
 {
-    int lab[maxN];
 
     DSU(int _n = 1)
     {

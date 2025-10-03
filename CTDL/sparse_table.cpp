@@ -29,9 +29,11 @@ const int LG = 20;
 #define MASK(i) (1LL << (i))
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 
+// Sparse Table
+int st[LG + 1][maxN];
+
 struct Sparse_Table
 {
-    int st[LG + 1][maxN];
     int *pArr;
     int N;
 
