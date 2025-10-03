@@ -17,7 +17,7 @@ using namespace std;
 #define ll long long
 #define ldb long double
 
-const int maxN = 1e5 + 5;
+const int maxN = 2e5 + 5;
 const ll MOD = 1e9 + 7;
 const int INF = 2e9;
 const ll INFLL = 4e18;
@@ -30,12 +30,6 @@ const int LG = 20;
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
 
-/*
-###################
-##    PREPARE    ##
-###################
-*/
-
 // Input
 int n;
 int val[maxN];
@@ -43,34 +37,35 @@ int val[maxN];
 // Tree
 vector<int> adj[maxN];
 int sz[maxN];
-int par[maxN];
 int h[maxN];
+int par[maxN];
 
-void calc(int u, int p = 0)
+void calc(int u)
 {
     sz[u] = 1;
 
     for (int v : adj[u])
     {
-        if (v == p)
+        if (v == par[u])
             continue;
-        
-        par[v] = u;
-        h[v] = h[u] + 1;
 
-        calc(v, u);
+        h[v] = h[u] + 1;
+        par[v] = u;
+
+        calc(v);
 
         sz[u] += sz[v];
     }
 }
 
 // Segment Tree
+ll ST[4 * maxN];
+
 struct Segment_Tree
 {
-    int *pArr;
-    ll ST[4 * maxN];
+    ll *pArr;
 
-    Segment_Tree(int *p) : pArr(p) {}
+    Segment_Tree(ll *p) : pArr(p) {}
 
     void build(int id, int l, int r)
     {
@@ -85,14 +80,11 @@ struct Segment_Tree
         build(2 * id, l, mid);
         build(2 * id + 1, mid + 1, r);
 
-        ST[id] = ST[2 * id] + ST[2 * id + 1];
+        ST[id] = ST[id << 1] + ST[id << 1 | 1];
     }
 
-    void update(int id, int l, int r, int i, int v)
+    void update(int id, int l, int r, int i, ll v)
     {
-        if (i < l || r < i)
-            return;
-
         if (l == r)
         {
             ST[id] = v;
@@ -101,108 +93,124 @@ struct Segment_Tree
 
         int mid = MID(l, r);
 
-        update(2 * id, l, mid, i, v);
-        update(2 * id + 1, mid + 1, r, i, v);
+        if (i > mid)
+            update(id << 1 | 1, mid + 1, r, i, v);
+        else
+            update(id << 1, l, mid, i, v);
 
-        ST[id] = ST[2 * id] + ST[2 * id + 1];
+        ST[id] = ST[id << 1] + ST[id << 1 | 1];
     }
 
     ll get(int id, int l, int r, int u, int v)
     {
         if (r < u || v < l)
-        {
             return 0;
-        }
-
+        
         if (u <= l && r <= v)
-        {
             return ST[id];
-        }
 
         int mid = MID(l, r);
 
-        return get(2 * id, l, mid, u, v) + get(2 * id + 1, mid + 1, r, u, v);
+        return get(id << 1, l, mid, u, v) + get(id << 1 | 1, mid + 1, r, u, v);
     }
 };
 
-/*
-###############
-##    HLD    ##
-###############
-*/
+// Heavy - Light Decomposition
+// Chain
+int chead[maxN], cid[maxN];
 
-int flat[maxN];
-
+// Flatten
+ll flat[maxN];
 int pos[maxN];
-int curpos = 0;
 
-int chain_id[maxN];
-int chain_head[maxN];
-int curchain = 0;
-
-void HLD(int u, int p = 0)
+struct HLD
 {
-    if (!chain_head[curchain])
+    int curc, curp;
+    Segment_Tree seg;
+
+    HLD() : curc(1), curp(0), seg(flat) {}
+
+    void build(int u)
     {
-        chain_head[curchain] = u;
+        if (!chead[curc])
+        {
+            chead[curc] = u;
+        }
+        cid[u] = curc;
+
+        pos[u] = ++curp;
+        flat[pos[u]] = val[u];
+
+        int nxt = 0;
+
+        for (int v : adj[u])
+        {
+            if (v == par[u])
+                continue;
+
+            if (!nxt || sz[nxt] < sz[v])
+                nxt = v;
+        }
+
+        if (!nxt)
+            return;
+
+        build(nxt);
+
+        for (int v : adj[u])
+        {
+            if (v == par[u] || v == nxt)
+                continue;
+            
+            ++curc;
+
+            build(v);
+        }
     }
 
-    chain_id[u] = curchain;
-    pos[u] = ++curpos;
-    flat[pos[u]] = val[u]; 
-
-    int nxt = 0;
-
-    for (int v : adj[u])
+    void preprocess()
     {
-        if (v == p)
-            continue;
-        
-        if (sz[v] > sz[nxt])
-            nxt = v;
+        build(1);
+        seg.build(1, 1, n);
     }
 
-    if (nxt) HLD(nxt, u);
-    for (int v : adj[u])
+    void update(int u, ll val)
     {
-        if (v == p || v == nxt)
-            continue;
-        
-        ++curchain;
-
-        HLD(v, u);   
+        seg.update(1, 1, n, pos[u], val);
     }
-}
 
-Segment_Tree segtree(flat);
-
-void hld_update(int s, int x)
-{
-    val[s] = x;
-    flat[pos[s]] = x;
-    segtree.update(1, 1, n, pos[s], x);
-}
-
-ll hld_get(int u, int v)
-{
-    ll res = 0;
-
-    while (chain_id[u] != chain_id[v])
+    ll get(int u, int v)
     {
-        if (h[chain_head[chain_id[u]]] > h[chain_head[chain_id[v]]])
+        ll res = 0;
+
+        while (cid[u] != cid[v])
+        {
+            if (h[chead[cid[u]]] < h[chead[cid[v]]])
+                swap(u, v);
+
+            res += seg.get(1, 1, n, pos[chead[cid[u]]], pos[u]);
+
+            u = par[chead[cid[u]]];
+        }
+
+        if (h[u] > h[v])
             swap(u, v);
 
-        res += segtree.get(1, 1, n, pos[chain_head[chain_id[v]]], pos[v]);
+        res += seg.get(1, 1, n, pos[u], pos[v]);
 
-        v = par[chain_head[chain_id[v]]];
+        return res;
     }
-    
-    if (h[u] > h[v])
-        swap(u, v);
-    
-    res += segtree.get(1, 1, n, pos[u], pos[v]);
+} hld;
 
-    return res;
+void solve()
+{
+    // Build par[], sz[], h[]
+    calc(1);
+
+    // Build HLD
+    hld.preprocess();
+
+    
 }
 
 signed main()
@@ -214,16 +222,7 @@ signed main()
     // freopen(".inp", "r", stdin);
     // freopen(".out", "w", stdout);
 
-    // ## INPUT
-
-    // sz, par, h
-    calc(1);
-
-    // Build HLD Chain
-    HLD(1);
-
-    // Build ST
-    segtree.build(1, 1, n);
+    solve();
 
     return 0;
 }
