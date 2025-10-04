@@ -148,7 +148,7 @@ struct HLD
             if (v == par[u])
                 continue;
 
-            if (!nxt || sz[nxt] < sz[v])
+            if (sz[nxt] < sz[v])
                 nxt = v;
         }
 
