@@ -29,41 +29,28 @@ const ll INFLL = 4e18;
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
 
+// Input
+int N;
+
 // Fenwick Tree
 int bit[maxN];
 
-struct BIT
+struct Fenwick_Tree
 {
-    int N;
-
-    BIT(int __N) : N(__N)
+    int get(int i)
     {
-        memset(bit, 0, sizeof(bit));
+        int res = 0;
+
+        for (int idx = i; idx > 0; idx -= lsb(idx))
+            res += bit[idx];
+        
+        return res;
     }
 
-    int get(int __idx)
+    void update(int i, int v)
     {
-        int idx = __idx;
-        int sum = 0;
-
-        while (idx > 0)
-        {
-            sum += bit[idx];
-            idx -= lsb(idx);
-        }
-
-        return sum;
-    }
-
-    void update(int __idx, int __val)
-    {
-        int idx = __idx;
-
-        while (idx <= N)
-        {
-            bit[idx] += __val;
-            idx += lsb(idx);
-        }
+        for (int idx = i; idx <= N; idx += lsb(idx))
+            bit[idx] += v;
     }
 };
 
