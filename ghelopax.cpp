@@ -19,7 +19,7 @@ using namespace std;
 
 const int maxN = 1e5 + 5;
 const ll MOD = 1e9 + 7;
-const int INF = 2e9;
+const int INF = 1e9;
 const ll INFLL = 4e18;
 const int LG = 20;
 
