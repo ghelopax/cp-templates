@@ -33,18 +33,18 @@ struct DSU
         return (lab[u] < 0 ? u : lab[u] = find(lab[u]));
     }
 
-    void join(int u, int v)
+    bool join(int u, int v)
     {
         u = find(u), v = find(v);
 
         if (u == v)
-            return;
+            return false;
 
-        if (lab[u] < lab[v])
-            swap(u, v);
-
+        if (lab[u] < lab[v]) swap(u, v);
         lab[v] += lab[u];
         lab[u] = v;
+
+        return true;
     }
 };
 
