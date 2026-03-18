@@ -30,6 +30,7 @@ const int LG = 20;
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 
 // Tree
+int root = 1;
 vector<int> child[maxN]; // hoặc sử dụng adj và kiểm tra v != p
 int h[maxN];
 
@@ -82,6 +83,20 @@ int LCA(int u, int v)
     return up[0][u];
 }
 
+void init()
+{
+    for (int u = 0; u < maxN; ++u)
+        child[u].clear();
+
+    memset(h, 0, sizeof(h));
+    memset(up, 0, sizeof(up));
+}
+
+void preprocess()
+{
+    calc(root);
+}
+
 signed main()
 {
     ios::sync_with_stdio(false);
@@ -91,7 +106,9 @@ signed main()
     // freopen(".inp", "r", stdin);
     // freopen(".out", "w", stdout);
 
-
+    init();
+    // input();
+    preprocess();
 
     return 0;
 }
