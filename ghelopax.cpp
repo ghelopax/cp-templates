@@ -42,7 +42,7 @@ void preprocess()
 {
 }
 
-void solve() // or: query()
+void solve() // or: void query()
 {
 }
 
