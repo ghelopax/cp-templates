@@ -34,36 +34,37 @@ const int LG = 20;
 int N;
 
 // Fenwick Tree
-ll bit[maxN];
+ll bitd[maxN];
+ll bitg[maxN];
 
-struct Fenwick_Tree
+struct BIT
 {
-    ll get(int i)
-    {
-        ll res = 0;
-
-        for (int idx = i; idx > 0; idx -= lsb(idx))
-            res += bit[idx];
-        
-        return res;
-    }
+    BIT(ll *_bit) : bit(_bit) {}
+    ll *bit;
 
     void update(int i, ll w)
     {
-        for (int idx = i; idx <= N; idx += lsb(idx))
-            bit[idx] += w;
+        for (; i <= N; i += lsb(i)) bit[i] += w;
     }
 
-    int kth(int k) // Binary Lifting
+    ll get(int i)
+    {
+        ll res = 0; for (; i > 0; i -= lsb(i)) res += bit[i]; return res;
+    }
+    
+    // Binary Lifting
+    // Monotonic prefix sum only
+    ll lb(ll w) // first pos: sum[1...i] >= w
     {
         int pos = 0;
         ll sum = 0;
+        
         for (int idx = LG; idx >= 0; --idx)
         {
             int nxt = pos + (1 << idx);
             if (nxt >= maxN) continue;
 
-            if (sum + bit[nxt] < k) 
+            if (sum + bit[nxt] < w) 
             {
                 pos = nxt;
                 sum += bit[nxt];
@@ -72,53 +73,24 @@ struct Fenwick_Tree
 
         return pos + 1;
     }
-};
+} ftd(bitd), ftg(bitg);
 
-ll bitd[maxN]; // BIT of difference array d[i] = a[i] - a[i - 1]
-ll bitg[maxN]; // BIT of g[i] = (i - 1) * d[i]
-
-struct RangeFT
+void update_range(int l, int r, ll w) // [l...r]: a_i += w
 {
-    ll get(int i)
+    ftd.update(l, w);
+    ftg.update(l, w * l);
+
+    if (r + 1 <= N)
     {
-        ll res = 0;
-
-        for (int idx = i; idx > 0; idx -= lsb(idx))
-        {
-            res += bitd[idx];
-        }
-
-        return res;
+        ftd.update(r + 1, -w);
+        ftg.update(r + 1, -w * (r + 1));
     }
+}
 
-    ll get_range(int i)
-    {
-        ll res = 0;
-
-        for (int idx = i; idx > 0; idx -= lsb(idx))
-        {
-            res += bitd[idx] * i - bitg[idx];
-        }
-
-        return res;
-    }
-
-    void update(ll *bit, int i, ll w)
-    {
-        for (int idx = i; idx <= N; idx += lsb(idx))
-        {
-            bit[idx] += w;
-        }
-    }
-
-    void update_range(int l, int r, ll w)
-    {
-        update(bitd, l, w);
-        update(bitd, r + 1, -w);
-        update(bitg, l, (l - 1) * w);
-        update(bitg, r + 1, -r * w);
-    }
-};
+ll get_range(ll i) // [1...i]: sum(a_i)
+{
+    return (i + 1) * ftd.get(i) - ftg.get(i);
+}
 
 signed main()
 {
