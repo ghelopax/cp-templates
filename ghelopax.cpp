@@ -30,20 +30,31 @@ const int LG = 20;
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
 
-void init()
-{
-}
+
 
 void input()
 {
 }
 
-void preprocess()
+namespace Subtask_1
 {
-}
+    bool constraint()
+    {
+    }
 
-void solve() // or: void query()
-{
+    void preprocess()
+    {
+    }
+
+    void solve() // or: void query()
+    {
+    }
+
+    void run()
+    {
+        preprocess();
+        solve(); // or: while(Q--) query();
+    }
 }
 
 signed main()
@@ -55,10 +66,7 @@ signed main()
     // freopen(".inp", "r", stdin);
     // freopen(".out", "w", stdout);
 
-    init();
-    input();
-    preprocess();
-    solve(); // or: while(Q--) query();
+    if (Subtask_1::constraint()) return Subtask_1::run(), 0;
 
     return 0;
 }
