@@ -66,6 +66,8 @@ signed main()
     // freopen(".inp", "r", stdin);
     // freopen(".out", "w", stdout);
 
+    input();
+
     if (Subtask_1::constraint()) return Subtask_1::run(), 0;
 
     return 0;

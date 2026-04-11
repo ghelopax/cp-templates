@@ -14,20 +14,46 @@ using namespace std;
  > ^ <  > ^ <  > ^ <  > ^ <
 */
 
-#define int long long
+#define ll long long
+#define ldb long double
+
+const int maxN = 1e5 + 5;
+const ll MOD = 1e9 + 7;
+const int INF = 1e9;
+const ll INFLL = 4e18;
+const int LG = 20;
+
 #define el "\n"
-#define INF LLONG_MAX
-#define maxN (int)(1e5 + 5)
+#define pb push_back
+#define eb emplace_back
+#define MASK(i) (1LL << (i))
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
+#define lsb(x) ((x) & -(x))
 
-// Segment_Tree
-int ST[4 * maxN];
+// Input
+int N;
+ll A[maxN];
 
+// Segment Tree
 struct Segment_Tree
 {
-    int *pArr;
+    private:
+    ll *pArr;
+    ll ST[4 * maxN];
+    ll LZ[4 * maxN];
 
-    Segment_Tree(int *p) : pArr(p) {}
+    void down(int id, int l, int r)
+    {
+        if (!LZ[id]) return;
+
+        ST[id << 1] += LZ[id];
+        ST[id << 1 | 1] += LZ[id];
+
+        LZ[id << 1] += LZ[id];
+        LZ[id << 1 | 1] += LZ[id];
+
+        LZ[id] = 0;
+    }
 
     void build(int id, int l, int r)
     {
@@ -39,51 +65,74 @@ struct Segment_Tree
 
         int mid = MID(l, r);
 
-        build(2 * id, l, mid);
-        build(2 * id + 1, mid + 1, r);
+        build(id << 1, l, mid);
+        build(id << 1 | 1, mid + 1, r);
 
-        // Merge
-        ST[id] = ST[2 * id] + ST[2 * id + 1];
+        ST[id] = min(ST[id << 1], ST[id << 1 | 1]);
     }
 
-    void update(int id, int l, int r, int idx, int val)
+    void update(int id, int l, int r, int u, int v, ll w)
     {
-        if (r < idx || idx < l)
+        if (r < u || v < l)
             return;
-        if (l == r)
+
+        if (u <= l && r <= v)
         {
-            ST[id] = val;
+            ST[id] += w;
+            LZ[id] += w;
             return;
         }
 
+        down(id, l, r);
+
         int mid = MID(l, r);
 
-        update(2 * id, l, mid, idx, val);
-        update(2 * id + 1, mid + 1, r, idx, val);
+        update(id << 1, l, mid, u, v, w);
+        update(id << 1 | 1, mid + 1, r, u, v, w);
 
-        // Merge
-        ST[id] = ST[2 * id] + ST[2 * id + 1];
+        ST[id] = min(ST[id << 1], ST[id << 1 | 1]);
     }
 
-    int get(int id, int l, int r, int lhs, int rhs)
+    ll get(int id, int l, int r, int u, int v)
     {
-        if (r < lhs || rhs < l)
-            return 0; // Identity
-        if (lhs <= l && r <= rhs)
+        if (r < u || v < l)
+            return INFLL;
+        
+        if (u <= l && r <= v)
             return ST[id];
+
+        down(id, l, r);
 
         int mid = MID(l, r);
 
-        int get1 = get(2 * id, l, mid, lhs, rhs);
-        int get2 = get(2 * id + 1, mid + 1, r, lhs, rhs);
+        return min(get(id << 1, l, mid, u, v), get(id << 1 | 1, mid + 1, r, u, v));
+    }
 
-        // Merge
-        return get1 + get2;
+    public:
+    Segment_Tree(ll *_pArr) : pArr(_pArr) {}
+
+    void build()
+    {
+        build(1, 1, N);
+    }
+
+    void update(int l, int r, ll w)
+    {
+        update(1, 1, N, l, r, w);
+    }
+
+    ll get(int l, int r)
+    {
+        return get(1, 1, N, l, r);
     }
 };
 
+Segment_Tree st(A);
+
 signed main()
 {
+    // input();
+    st.build();
 
     return 0;
 }
