@@ -27,6 +27,7 @@ const int LG = 20;
 #define pb push_back
 #define eb emplace_back
 #define MASK(i) (1LL << (i))
+#define BIT(msk, i) (((msk) >> (i)) & 1LL)
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
 

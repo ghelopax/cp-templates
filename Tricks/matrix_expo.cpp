@@ -16,7 +16,7 @@ using namespace std;
 
 #define ll long long
 #define ldb long double
-#define matrix vector<vector<ll>>
+#define mat vector<vector<ll>>
 
 const int maxN = 1e5 + 5;
 const ll MOD = 1e9 + 7;
@@ -28,47 +28,80 @@ const int LG = 62;
 #define pb push_back
 #define eb emplace_back
 #define MASK(i) (1LL << (i))
+#define BIT(msk, i) (((msk) >> (i)) & 1LL)
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
 
-int sz;
-
-void add(ll &a, ll b)
+// Matrix Exponentiation
+void add(ll &x, ll w)
 {
-    a = (a + b % MOD) % MOD;
+    x = (x + w % MOD) % MOD;
 }
 
-matrix idenmat()
+struct matrix
 {
-    matrix res(sz, vector<ll>(sz, 0));
+    int row, col;
+    mat m;
 
-    for (int i = 0; i < sz; ++i)
-        res[i][i] = 1;
+    matrix() {}
+    matrix(int _row, int _col) : row(_row), col(_col), m(_row, vector<ll>(_col, 0)) {}
+    matrix(mat v) : row(v.size()), col(v[0].size()), m(v) {}
 
-    return res;
-}
-
-matrix mul(matrix &a, matrix &b)
-{
-    matrix res(sz, vector<ll>(sz, 0));
-
-    for (int i = 0; i < sz; ++i)
-        for (int j = 0; j < sz; ++j)
-            for (int k = 0; k < sz; ++k)
-                add(res[i][j], a[i][k] * b[k][j]);
-
-    return res;
-}
-
-matrix expo(matrix &a, ll n)
-{
-    matrix res = idenmat();
-
-    for (matrix b(a); n > 0; n >>= 1, b = mul(b, b))
-        if (n & 1) res = mul(res, b);
+    void iden()
+    {
+        for (int i = 0; i < row; ++i)
+            m[i][i] = 1;
+    }
     
-    return res;
-}
+    vector<ll>& operator[](int i) { return m[i]; }
+
+    matrix operator*(matrix &o)
+    {
+        matrix res(row, o.col);
+
+        for (int i = 0; i < row; ++i)
+        {
+            for (int j = 0; j < o.col; ++j)
+            {
+                for (int k = 0; k < col; ++k)
+                {
+                    add(res[i][j], m[i][k] * o[k][j]);
+                }
+            }
+        }
+
+        return res;
+    }
+
+    matrix expo(ll x)
+    {
+        matrix res(row, row);
+        res.iden();
+        matrix b = *this;
+
+        for (ll i = 0; i < LG; ++i)
+        {
+            if (BIT(x, i))
+                res = res * b;
+            
+            b = b * b;
+        }
+        
+        return res;
+    }
+
+    void print()
+    {
+        for (int i = 0; i < row; ++i)
+        {
+            for (int j = 0; j < col; ++j)
+            {
+                cout << m[i][j] << ' ';
+            }
+            cout << el;
+        }
+    }
+};
 
 signed main()
 {
