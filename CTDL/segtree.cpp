@@ -108,6 +108,22 @@ struct Segment_Tree
         return min(get(id << 1, l, mid, u, v), get(id << 1 | 1, mid + 1, r, u, v));
     }
 
+    // Max Segtree
+    // int lwb(int id, int l, int r, ll w)
+    // {
+    //     if (ST[id] < w)
+    //         return -1;
+    //     if (l == r)
+    //         return l;
+
+    //     int mid = MID(l, r);
+
+    //     if (ST[id << 1] >= w)
+    //         return lwb(id << 1, l, mid, w);
+    //     else
+    //         return lwb(id << 1 | 1, mid + 1, r, w);
+    // }
+
     public:
     Segment_Tree(ll *_pArr) : pArr(_pArr) {}
 
