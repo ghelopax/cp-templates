@@ -34,13 +34,9 @@ const int LG = 20;
 int N;
 
 // Fenwick Tree
-ll bitd[maxN];
-ll bitg[maxN];
-
 struct BIT
 {
-    BIT(ll *_bit) : bit(_bit) {}
-    ll *bit;
+    ll bit[maxN];
 
     void update(int i, ll w)
     {
@@ -73,24 +69,93 @@ struct BIT
 
         return pos + 1;
     }
-} ftd(bitd), ftg(bitg);
+};
 
-void update_range(int l, int r, ll w) // [l...r]: a_i += w
+struct RangeBIT
 {
-    ftd.update(l, w);
-    ftg.update(l, w * l);
+    private:
+    BIT ft, ift;
 
-    if (r + 1 <= N)
+    void update(int i, ll w)
     {
-        ftd.update(r + 1, -w);
-        ftg.update(r + 1, -w * (r + 1));
+        ft.update(i, w);
+        ift.update(i, i * w);
     }
-}
 
-ll get_range(ll i) // [1...i]: sum(a_i)
+    ll get(int i)
+    {
+        return (i + 1) * ft.get(i) - ift.get(i);
+    }
+
+    public:
+    void update(int l, int r, ll w)
+    {
+        update(l, w);
+        
+        if (r + 1 <= N)
+            update(r + 1, -w);
+    }
+
+    ll get(int l, int r)
+    {
+        return get(r) - get(l - 1);
+    }
+};
+
+// Fenwick Tree 2D
+struct BIT2D
 {
-    return (i + 1) * ftd.get(i) - ftg.get(i);
-}
+    ll bit[maxN][maxN];
+
+    void update(int i, int j, ll w)
+    {
+        for (int idx = i; idx <= N; idx += lsb(idx))
+            for (int jdx = j; jdx <= N; jdx += lsb(jdx))
+                bit[idx][jdx] += w;
+    }
+
+    ll get(int i, int j)
+    {
+        ll res = 0;
+        for (int idx = i; idx > 0; idx -= lsb(idx))
+            for (int jdx = j; jdx > 0; jdx -= lsb(jdx))
+                res += bit[idx][jdx];
+        return res;
+    }
+};
+
+struct RangeBIT2D
+{
+    private:
+    BIT2D ft, ift, jft, ijft;
+
+    void update(int i, int j, ll w)
+    {
+        ft.update(i, j, w);
+        ift.update(i, j, i * w);
+        jft.update(i, j, j * w);
+        ijft.update(i, j, i*j * w);
+    }
+
+    ll get(int i, int j)
+    {
+        return (i + 1)*(j + 1) * ft.get(i, j) - (i + 1) * jft.get(i, j) - (j + 1) * ift.get(i, j) + ijft.get(i, j);
+    }
+
+    public:
+    void update(int x, int y, int u, int v, ll w)
+    {
+        update(x, y, w);
+        update(x, v + 1, -w);
+        update(u + 1, y, -w);
+        update(u + 1, v + 1, w);
+    }
+
+    ll get(int x, int y, int u, int v)
+    {
+        return get(u, v) - get(u, y - 1) - get(x - 1, v) + get(x - 1, y - 1);
+    }
+};
 
 signed main()
 {
