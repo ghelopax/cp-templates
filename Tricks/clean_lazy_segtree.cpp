@@ -17,7 +17,7 @@ using namespace std;
 #define ll long long
 #define ldb long double
 
-const int maxN = 2e5 + 5;
+const int maxN = 1e5 + 5;
 const ll MOD = 1e9 + 7;
 const int INF = 1e9;
 const ll INFLL = 4e18;
@@ -32,32 +32,14 @@ const int LG = 20;
 #define lsb(x) ((x) & -(x))
 #define FOR(i, l, r) for (ll i = (l); i <= (ll)(r); ++i)
 
-struct DATA
+struct Data
 {
     ll value;
 
-    DATA(ll _value = 0) 
+    Data() : value(0) {}
+    Data(ll _value) 
     {
         value = (_value % MOD + MOD) % MOD;
-    }
-
-    DATA operator+(const DATA &o) const
-    {
-        ll res = value;
-        res += o.value;
-        if (res >= MOD) res -= MOD;
-        return DATA(res);
-    }
-
-    DATA operator*(const DATA &o) const
-    {
-        return DATA((value * o.value) % MOD);
-    }
-
-    void operator+=(const DATA &o)
-    {
-        value += o.value;
-        if (value >= MOD) value -= MOD;
     }
 
     void operator=(const ll w)
@@ -65,20 +47,20 @@ struct DATA
         value = w;
     }
 
-    bool operator==(const ll o) const
+    bool operator==(const ll w)
     {
-        return value == o;
+        return value == w;
     }
 
-    DATA sqre()
+    Data operator+(const Data &o) const
     {
-        return *this * *this;
+        return Data(value + o.value);
     }
 
-    DATA cube()
+    Data operator*(const Data &o) const
     {
-        return sqre() * *this;
-    }
+        return Data(value * o.value);
+    }    
 };
 
 int N, Q;
@@ -95,153 +77,64 @@ namespace Subtask_1
 {
     bool constraint()
     {
-        return N <= 2e3 && Q <= 2e3;
-    }
-
-    DATA arr[maxN];
-
-    void preprocess()
-    {
-        FOR(i, 1, N) arr[i] = DATA(a[i]);
-    }
-
-    void query()
-    {
-        char type;
-        cin >> type;
-
-        if (type == '0')
-        {
-            int l, r;
-            ll val;
-            cin >> l >> r >> val;
-
-            FOR(i, l, r) arr[i] = DATA(val);
-        }
-        else if (type == '1')
-        {
-            int l, r;
-            ll val;
-            cin >> l >> r >> val;
-
-            FOR(i, l, r) arr[i] += DATA(val);
-        }
-        else
-        {
-            int l, r;
-            cin >> l >> r;
-
-            DATA ans(0);
-            FOR(i, l, r) ans += arr[i].cube();
-            cout << ans.value << el;
-        }
-    }
-
-    void run()
-    {
-        preprocess();
-        while(Q--) query();
-    }
-}
-
-namespace Subtask_5
-{
-    bool constraint()
-    {
         return true;
     }
 
     struct Segment_Tree
     {
         private:
-        struct Node
-        {
-            // sum of x^3, x^2, x
-            DATA cb, sq, sm;
-
-            Node() : cb(0), sq(0), sm(0) {}
-            Node(ll _cb, ll _sq, ll _sm) : cb(_cb), sq(_sq), sm(_sm) {}
-            Node(DATA _cb, DATA _sq, DATA _sm) : cb(_cb), sq(_sq), sm(_sm) {}
-
-            Node operator+(const Node &o) const
-            {
-                return Node(cb + o.cb, sq + o.sq, sm + o.sm);
-            }
-        };
+        ll *p;
 
         struct Tag
         {
-            // x -> ax + b
-            DATA a, b;
+            Data a, b;
 
             Tag() : a(1), b(0) {}
-            Tag(DATA _a, DATA _b) : a(_a), b(_b) {}
+            Tag(ll _a, ll _b) : a(_a), b(_b) {}
+            Tag(Data _a, Data _b) : a(_a), b(_b) {}
 
-            bool empty()
-            {
-                return a == 1 && b == 0;
-            }
-
-            void reset()
-            {
-                a = 1;
-                b = 0;
-            }
-
-            void compose(const Tag &o)
+            void compose(const Tag o)
             {
                 a = o.a * a;
                 b = o.a * b + o.b;
             }
-        };
 
-        Node ST[4 * maxN];
-        Tag LZ[4 * maxN];
+            bool empty()
+            {
+                return (a == 1 && b == 0);
+            }
 
-        void apply(Node &cur, Tag t, DATA len)
+            void reset()
+            {
+                a = 1; b = 0;
+            }
+        } LZ[4 * maxN];
+
+        struct Node
         {
-            if (t.a == 1)
-            {
-                cur.cb += DATA(3) * (t.b * cur.sq + t.b.sqre() * cur.sm) + t.b.cube() * len;
-                cur.sq += DATA(2) * t.b * cur.sm + t.b.sqre() * len;
-                cur.sm += t.b * len;
-            }
-            else
-            {
-                cur.cb = t.b.cube();
-                cur.sq = t.b.sqre();
-                cur.sm = t.b;
-            }
-        }
+            Data sum;
 
-        void down(int id, int l, int r)
-        {
-            if (LZ[id].empty()) return;
+            Node() : sum(0) {}
+            Node(Data _sum) : sum(_sum) {}
 
-            if (l != r)
+            Node operator+(const Node &o) const
             {
-                int mid = MID(l, r);
-
-                apply(ST[id << 1], LZ[id], mid - l + 1);
-                apply(ST[id << 1 | 1], LZ[id], r - mid);
-                
-                LZ[id << 1].compose(LZ[id]);
-                LZ[id << 1 | 1].compose(LZ[id]);
+                return Node(sum + o.sum);
             }
 
-            LZ[id].reset();
-        }
+            void apply(Tag t, Data len)
+            {
+                sum = t.a * sum + t.b * len;
+            }
+        } ST[4 * maxN];
 
         void build(int id, int l, int r)
         {
             if (l == r)
             {
                 ST[id] = Node(
-                    DATA(a[l]).cube(),
-                    DATA(a[l]).sqre(),
-                    DATA(a[l])
+                    Data(p[l])
                 );
-
                 return;
             }
 
@@ -253,33 +146,51 @@ namespace Subtask_5
             ST[id] = ST[id << 1] + ST[id << 1 | 1];
         }
 
-        void update(int id, int l, int r, int u, int v, ll a, ll b)
+        void down(int id, int l, int r)
         {
-            if (u <= l && r <= v)
+            if (LZ[id].empty()) return;
+
+            if (l != r)
             {
-                apply(ST[id], Tag(a, b), r - l + 1);
-                LZ[id].compose(Tag(a, b));
-                return;
+                int mid = MID(l, r);
+
+                ST[id << 1].apply(LZ[id], mid - l + 1);
+                ST[id << 1 | 1].apply(LZ[id], r - mid);
+
+                LZ[id << 1].compose(LZ[id]);
+                LZ[id << 1 | 1].compose(LZ[id]);
             }
 
+            LZ[id].reset();
+        }
+
+        void update(int id, int l, int r, int u, int v, Tag t)
+        {
             if (r < u || v < l) return;
+
+            if (u <= l && r <= v)
+            {
+                ST[id].apply(t, r - l + 1);
+                LZ[id].compose(t);
+                return;
+            }
 
             down(id, l, r);
 
             int mid = MID(l, r);
 
-            update(id << 1, l, mid, u, v, a, b);
-            update(id << 1 | 1, mid + 1, r, u, v, a, b);
+            update(id << 1, l, mid, u, v, t);
+            update(id << 1 | 1, mid + 1, r, u, v, t);
 
             ST[id] = ST[id << 1] + ST[id << 1 | 1];
         }
 
-        DATA get(int id, int l, int r, int u, int v)
+        Data get(int id, int l, int r, int u, int v)
         {
-            if (u <= l && r <= v)
-                return ST[id].cb;
+            if (r < u || v < l) return Data(0);
 
-            if (r < u || v < l) return 0;
+            if (u <= l && r <= v)
+                return ST[id].sum;
 
             down(id, l, r);
 
@@ -289,24 +200,28 @@ namespace Subtask_5
         }
 
         public:
+        Segment_Tree(ll *_p) : p(_p) {}
+
         void build()
         {
             build(1, 1, N);
         }
 
-        void update(int l, int r, ll w, bool mode)
+        void update(char type, int l, int r, ll w)
         {
-            if (mode)
-                update(1, 1, N, l, r, 1, w);
+            if (type == '1')
+                update(1, 1, N, l, r, Tag(1, w));
+            else if (type == '2')
+                update(1, 1, N, l, r, Tag(w, 0));
             else
-                update(1, 1, N, l, r, 0, w);
+                update(1, 1, N, l, r, Tag(0, w));
         }
 
-        DATA get(int l, int r)
+        ll get(int l, int r)
         {
-            return get(1, 1, N, l, r);
+            return get(1, 1, N, l, r).value;
         }
-    } ST;
+    } ST(a);
 
     void preprocess()
     {
@@ -316,31 +231,17 @@ namespace Subtask_5
     void query()
     {
         char type;
-        cin >> type;
+        int l, r;
+        cin >> type >> l >> r;
 
-        if (type == '0')
+        if (type != '4')
         {
-            int l, r;
-            ll val;
-            cin >> l >> r >> val;
+            ll x; cin >> x;
 
-            ST.update(l, r, val, 0);
-        }
-        else if (type == '1')
-        {
-            int l, r;
-            ll val;
-            cin >> l >> r >> val;
-
-            ST.update(l, r, val, 1);
+            ST.update(type, l, r, x);
         }
         else
-        {
-            int l, r;
-            cin >> l >> r;
-
-            cout << ST.get(l, r).value << el;
-        }
+            cout << ST.get(l, r) << el;
     }
 
     void run()
@@ -362,7 +263,6 @@ signed main()
     input();
 
     if (Subtask_1::constraint()) return Subtask_1::run(), 0;
-    if (Subtask_5::constraint()) return Subtask_5::run(), 0;
 
     return 0;
 }
