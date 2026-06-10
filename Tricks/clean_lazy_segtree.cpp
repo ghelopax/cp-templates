@@ -185,12 +185,15 @@ namespace Subtask_1
             ST[id] = ST[id << 1] + ST[id << 1 | 1];
         }
 
-        Data get(int id, int l, int r, int u, int v)
+        Node get(int id, int l, int r, int u, int v)
         {
-            if (r < u || v < l) return Data(0);
+            if (r < u || v < l) 
+                return Node(
+                    Data(0)
+                );
 
             if (u <= l && r <= v)
-                return ST[id].sum;
+                return ST[id];
 
             down(id, l, r);
 
@@ -219,7 +222,7 @@ namespace Subtask_1
 
         ll get(int l, int r)
         {
-            return get(1, 1, N, l, r).value;
+            return get(1, 1, N, l, r).sum.value;
         }
     } ST(a);
 
