@@ -18,99 +18,92 @@ using namespace std;
 #define ldb long double
 
 const int maxN = 1e5 + 5;
-const int MOD = 1e9 + 7;
-const int INF = 2e9;
+const ll MOD = 1e9 + 7;
+const int INF = 1e9;
 const ll INFLL = 4e18;
+const int LG = 20;
 
 #define el "\n"
 #define pb push_back
 #define eb emplace_back
 #define MASK(i) (1LL << (i))
+#define BIT(msk, i) (((msk) >> (i)) & 1LL)
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
+#define lsb(x) ((x) & -(x))
+#define FOR(i, l, r) for (int i = (l); i <= (int)(r); ++i)
+#define FORLL(i, l, r) for (ll i = (l); i <= (ll)(r); ++i)
 
-// Trie
-struct Trie
+
+
+void input()
 {
-    struct Node
+}
+
+namespace Subtask_1
+{
+    bool constraint()
     {
-        Node *child[26];
+        return true;
+    }
+
+    struct Trie
+    {
+        private:
+        struct Node
+        {
+            int nxt[26];
+
+            int exist;
+        } TR[maxN];
+
+        int cur;
+
+        int newNode()
+        {
+            ++cur;
+            memset(TR[cur].nxt, -1, sizeof(TR[cur].nxt));
+            return cur;
+        }
+
+        public:
+        Trie() : cur(0)
+        {
+            memset(TR[0].nxt, -1, sizeof(TR[0].nxt));
+            TR[0].exist = 0;
+        }
+
+        void insert(const string &str)
+        {
+            int u = 0;
+            for (char ch : str)
+            {
+                int c = ch - 'a';
+                if (TR[u].nxt[c] == -1)
+                    TR[u].nxt[c] = newNode();
+                
+                u = TR[u].nxt[c];
+            }
+
+            ++TR[u].exist;
+        }
     };
 
-    Node *root;
+    Trie trie;
 
-    Trie()
+    void preprocess()
     {
-        root = new Node();
     }
 
-    void add(string s)
+    void solve() // or: void query()
     {
-        Node *p = root;
-
-        for (char c : s)
-        {
-            int _c = c - 'a';
-            Node *&chi = p->child[_c];
-
-            if (chi == nullptr)
-                chi = new Node();
-
-            p = chi;
-        }
-    }
-};
-
-// Trie nhị phân
-struct Binary_Trie
-{
-    struct Node
-    {
-        Node *child[2];
-        ll value;
-    };
-
-    Node *root;
-
-    Binary_Trie()
-    {
-        root = new Node();
     }
 
-    void add(ll __val)
+    void run()
     {
-        Node *p = root;
-
-        for (int i = 63; i >= 0; --i)
-        {
-            bool bit = (__val >> i) & 1LL;
-            Node *&chi = p->child[bit];
-
-            if (chi == nullptr)
-                chi = new Node();
-
-            p = chi;
-        }
-
-        p->value = __val;
+        preprocess();
+        solve(); // or: while(Q--) query();
     }
-
-    ll max_xor(ll __val)
-    {
-        Node *p = root;
-
-        for (int i = 63; i >= 0; --i)
-        {
-            bool bit = (__val >> i) & 1LL;
-
-            Node *xorchi = p->child[!bit];
-            Node *chi = p->child[bit];
-
-            p = (xorchi == nullptr ? chi : xorchi);
-        }
-
-        return p->value;
-    }
-};
+}
 
 signed main()
 {
@@ -120,6 +113,10 @@ signed main()
 
     // freopen(".inp", "r", stdin);
     // freopen(".out", "w", stdout);
+
+    input();
+
+    if (Subtask_1::constraint()) return Subtask_1::run(), 0;
 
     return 0;
 }

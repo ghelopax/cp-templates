@@ -30,7 +30,8 @@ const int LG = 20;
 #define BIT(msk, i) (((msk) >> (i)) & 1LL)
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
-#define FOR(i, l, r) for (ll i = (l); i <= (ll)(r); ++i)
+#define FOR(i, l, r) for (int i = (l); i <= (int)(r); ++i)
+#define FORLL(i, l, r) for (ll i = (l); i <= (ll)(r); ++i)
 
 
 

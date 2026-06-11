@@ -52,36 +52,29 @@ namespace Subtask_1
         int sz;
         string str;
 
-        void init(const string &_str)
-        {
-            sz = _str.size();
-            str = "#" + _str + "#";
-        }
+        int fail[maxN];
+        int aut[maxN][26];
 
-        int fail[maxN]; // fail link
-        int aut[maxN][26]; // automaton
-
-        void build_fail()
+        void build()
         {
             fail[0] = fail[1] = 0;
             FOR(i, 2, sz)
             {
                 int u = fail[i - 1];
-
-                while (u != 0 && str[i] != str[u + 1]) u = fail[u];
-
-                if (u == 0) fail[i] = (str[i] == str[1] ? 1 : 0);
-                else fail[i] = u + 1;
+                for (; u != 0 && str[u + 1] != str[i]; u = fail[u]);
+                if (u == 0) fail[i] = (str[1] == str[i]); else fail[i] = u + 1;
             }
+
+            FOR(c, 0, 25) aut[0][c] = (c == str[1] - 'a');
+            FOR(i, 1, sz) FOR(c, 0, 25) aut[i][c] = (c == str[i + 1] - 'a' ? i + 1 : aut[fail[i]][c]);
         }
 
-        void build_aut()
+        void init(const string &_str)
         {
-            FOR(c, 0, 25) aut[0][c] = (c == str[0] ? 1 : 0);
-            FOR(i, 0, sz)
-                FOR(c, 0, 25)
-                    // Depends on problem's alphabet. Default to 26 uppercase letters
-                    aut[i][c] = (c == str[i + 1] - 'A' ? i + 1 : aut[fail[i]][c]);
+            sz = _str.size();
+            str = "#" + _str + "#";
+
+            build();
         }
     };
 
@@ -90,30 +83,10 @@ namespace Subtask_1
     void preprocess()
     {
         kmp.init(S);
-        kmp.build_fail();
-        kmp.build_aut();
     }
 
     void solve() // or: void query()
-    { 
-        /* 
-            ## Example use: Find matchings of Pattern S in Text T
-        */
-        string T; cin >> T;
-
-
-        int u = 0; // initial state: empty string
-        for (char c : T)
-        {
-            // Depends on problem's alphabet. Default to 26 uppercase letters
-            u = kmp.aut[u][c - 'A']; // automaton transition
-
-            // Exact matching found
-            if (u == kmp.sz)
-            {
-                // do something with the matching...
-            }
-        }
+    {
     }
 
     void run()
