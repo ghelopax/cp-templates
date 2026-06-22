@@ -56,8 +56,11 @@ namespace Subtask_1
         FOR(i, 1, sz - 1)
         {
             if (i <= r) z[i] = min(z[i - l], r - i + 1);
+            
             for (; i + z[i] < sz && str[i + z[i]] == str[z[i]]; ++z[i]);
-            if (i + z[i] - 1 > r) l = i, r = i + z[i] - 1;
+
+            if (i + z[i] - 1 > r) 
+                l = i, r = i + z[i] - 1;
         }
 
         return z;

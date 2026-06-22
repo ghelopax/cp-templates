@@ -30,7 +30,7 @@ const int LG = 20;
 #define BIT(msk, i) (((msk) >> (i)) & 1LL)
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
-#define FOR(i, l, r) for (ll i = (l); i <= (ll)(r); ++i)
+#define FOR(i, l, r) for (int i = (l); i <= (int)(r); ++i)
 
 string S;
 
@@ -57,22 +57,33 @@ namespace Subtask_1
 
         void build()
         {
-            fail[0] = fail[1] = 0;
-            FOR(i, 2, sz)
-            {
-                int u = fail[i - 1];
-                for (; u != 0 && str[u + 1] != str[i]; u = fail[u]);
-                if (u == 0) fail[i] = (str[1] == str[i]); else fail[i] = u + 1;
-            }
+            // fail[0] = fail[1] = 0;
+            // FOR(i, 2, sz)
+            // {
+            //     int u = fail[i - 1];
+            //     for (; u != 0 && str[u + 1] != str[i]; u = fail[u]);
+            //     if (u == 0) fail[i] = (str[1] == str[i]); 
+            //     else fail[i] = u + 1;
+            // }
 
-            FOR(c, 0, 25) aut[0][c] = (c == str[1] - 'a');
-            FOR(i, 1, sz) FOR(c, 0, 25) aut[i][c] = (c == str[i + 1] - 'a' ? i + 1 : aut[fail[i]][c]);
+            fail[0] = fail[1] = 0;
+            FOR(c, 0, 25) aut[0][c] = (c == str[1] - 'A');
+
+            FOR(i, 1, sz) FOR(c, 0, 25)
+            {
+                if (c == str[i + 1] - 'A')
+                {
+                    aut[i][c] = i + 1;
+                    fail[i + 1] = aut[fail[i]][c];
+                }
+                else aut[i][c] = aut[fail[i]][c];
+            }
         }
 
-        void init(const string &_str)
+        void init(const string &pattern)
         {
-            sz = _str.size();
-            str = "#" + _str + "#";
+            sz = pattern.size();
+            str = "#" + pattern + "#";
 
             build();
         }
@@ -87,6 +98,7 @@ namespace Subtask_1
 
     void solve() // or: void query()
     {
+        
     }
 
     void run()
