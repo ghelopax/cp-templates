@@ -143,12 +143,43 @@ struct Segment_Tree
     }
 };
 
-Segment_Tree st(A);
+// Segment Tree on time
+struct Event
+{
+
+};
+
+struct Segment_Tree_T
+{
+    private:
+    vector<Event> ST[4 * maxN];
+
+    void update(int id, int l, int r, int u, int v, Event e)
+    {
+        if (r < u || v < l) return;
+        if (u <= l && r <= v)
+        {
+            ST[id].pb(e);
+            return;
+        }
+
+        int mid = MID(l, r);
+        update(id << 1, l, mid, u, v, e);
+        update(id << 1 | 1, mid + 1, r, u, v, e);
+    }
+
+    public:
+    void update(int l, int r, Event e)
+    {
+        // update(1, 0, Q, l, r, e);
+    }
+
+    vector<Event>& getnode(int id) { return ST[id]; }
+};
 
 signed main()
 {
-    // input();
-    st.build();
+    
 
     return 0;
 }
