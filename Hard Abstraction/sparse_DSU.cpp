@@ -14,6 +14,11 @@ using namespace std;
  > ^ <  > ^ <  > ^ <  > ^ <
 */
 
+/*
+    OJ.UZ
+    COCI 2025/2026 Contest #4 Magija
+*/
+
 #define ll long long
 #define ldb long double
 #define pii pair<int, int>

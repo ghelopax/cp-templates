@@ -14,6 +14,11 @@ using namespace std;
  > ^ <  > ^ <  > ^ <  > ^ <
 */
 
+/*
+    QOJ
+    NOI 2026 Final - Task 4: Gemstones
+*/
+
 #define ll long long
 #define ldb long double
 
@@ -133,7 +138,7 @@ namespace Subtask_9
         }
     };
 
-    struct Automaton
+    struct Manager
     {
         private:
         map<int, int> nxt[maxN];
@@ -187,20 +192,20 @@ namespace Subtask_9
                 cout << state[i] << ' ';
             cout << el;
         }
-    } Auto;
+    } mng;
 
     void preprocess()
     {
-        Auto.build(c);
-        // Auto.printID();
-        // Auto.printTree();
+        mng.build(c);
+        // mng.printID();
+        // mng.printTree();
     }
 
     void query()
     {
         int l, r; cin >> l >> r;
 
-        cout << Auto.query(l, r) << el;
+        cout << mng.query(l, r) << el;
     }
 
     void run()

@@ -75,9 +75,8 @@ namespace Subtask_1
     }
 
     // Segment Tree on time
-    struct Segment_Tree_T
+    struct Segment_Tree
     {
-        private:
         vector<Edge> ST[4 * maxN];
 
         void update(int id, int l, int r, int u, int v, Edge e)
@@ -93,18 +92,10 @@ namespace Subtask_1
             update(id << 1, l, mid, u, v, e);
             update(id << 1 | 1, mid + 1, r, u, v, e);
         }
-
-        public:
-        void update(int l, int r, Edge e)
-        {
-            update(1, 0, k, l, r, e);
-        }
-
-        vector<Edge>& getnode(int id) { return ST[id]; }
     };
 
     // DSU Rollback
-    struct RB_DSU
+    struct DSU
     {
         private:
         int lab[maxN];
@@ -120,11 +111,13 @@ namespace Subtask_1
         public:
         int cnt;
         stack<Action> history;
+        int old_sz;
 
         void init(int _N)
         {
             memset(lab, -1, sizeof(lab));
             cnt = _N;
+            old_sz = 0;
         }
 
         int findRoot(int u)
@@ -151,20 +144,23 @@ namespace Subtask_1
 
         void rollback()
         {
-            Action lastAct = history.top(); history.pop();
+            Action act = history.top(); history.pop();
 
-            lab[lab[lastAct.node]] -= lastAct.old_lab;
-            lab[lastAct.node] = lastAct.old_lab;
+            lab[lab[act.node]] -= act.old_lab;
+            lab[act.node] = act.old_lab;
             ++cnt;
         }
+
+        void snapshot() { old_sz = isz(history); }
+        void restore() { while (isz(history) > old_sz) rollback(); }
     };
 
     int ans[maxN];
 
     struct Manager
     {
-        RB_DSU dsu;
-        Segment_Tree_T st;
+        DSU dsu;
+        Segment_Tree st;
         map<Edge, int> last;
 
         void init()
@@ -175,16 +171,13 @@ namespace Subtask_1
                 last[GE[id]] = 0;
         }
 
-        void update(int l, int r, Edge e)
-        {
-            st.update(l, r, e);
-        }        
+        void update(int l, int r, Edge e) { st.update(1, 0, k, l, r, e); }
 
         void dfs(int id, int l, int r)
         {
-            int old_sz = isz(dsu.history);
+            dsu.snapshot();
 
-            for (Edge &e : st.getnode(id))
+            for (Edge &e : st.ST[id])
                 dsu.join(e.u, e.v);
 
             if (l != r)
@@ -195,8 +188,7 @@ namespace Subtask_1
             }
             else ans[l] = dsu.cnt;
 
-            while (isz(dsu.history) > old_sz)
-                dsu.rollback();
+            dsu.restore();
         }
     } mng;
 

@@ -51,27 +51,24 @@ namespace Subtask_1
         struct Node
         {
             int nxt[26];
-
-            vector<int> strid;
-        } TR[maxN];
+            vector<int> ids;
+        } T[maxN];
 
         int cur;
 
         int newNode()
         {
             ++cur;
-            memset(TR[cur].nxt, -1, sizeof(TR[cur].nxt));
-            TR[cur].strid.clear();
+            memset(T[cur].nxt, -1, sizeof(T[cur].nxt));
+            T[cur].ids.clear();
             return cur;
         }
 
         Trie() : cur(0)
         {
-            memset(TR[0].nxt, -1, sizeof(TR[0].nxt));
+            memset(T[0].nxt, -1, sizeof(T[0].nxt));
+            T[0].ids.clear();
         }
-
-        int next(int u, int c) { return TR[u].nxt[c]; }
-        bool exist(int u, int c) { return TR[u].nxt[c] != -1; }
 
         void insert(int id, const string &str)
         {
@@ -79,13 +76,13 @@ namespace Subtask_1
             for (char ch : str)
             {
                 int c = ch - 'A';
-                if (TR[u].nxt[c] == -1)
-                    TR[u].nxt[c] = newNode();
+                if (T[u].nxt[c] == -1)
+                    T[u].nxt[c] = newNode();
                 
-                u = TR[u].nxt[c];
+                u = T[u].nxt[c];
             }
 
-            TR[u].strid.pb(id);
+            T[u].ids.pb(id);
         }
     };
 
@@ -96,10 +93,7 @@ namespace Subtask_1
         int aut[maxN][26];
         int exit[maxN];
 
-        void insert(int id, const string &pattern)
-        {
-            trie.insert(id, pattern);
-        }
+        void insert(int id, const string &pattern) { trie.insert(id, pattern); }
 
         void build()
         {
@@ -109,7 +103,7 @@ namespace Subtask_1
             exit[0] = 0;
             FOR(c, 0, 25)
             {
-                int v = trie.next(0, c);
+                int v = trie.T[0].nxt[c];
                 if (v == -1) aut[0][c] = 0;
                 else
                 {
@@ -126,13 +120,13 @@ namespace Subtask_1
 
                 FOR(c, 0, 25)
                 {
-                    int v = trie.next(u, c);
+                    int v = trie.T[u].nxt[c];
                     if (v == -1) aut[u][c] = aut[fail[u]][c];
                     else
                     {
                         aut[u][c] = v;
                         fail[v] = aut[fail[u]][c];
-                        exit[v] = (trie.TR[fail[v]].strid.empty() ? exit[fail[v]] : fail[v]);
+                        exit[v] = (trie.T[fail[v]].ids.empty() ? exit[fail[v]] : fail[v]);
                         q.push(v);
                     }
                 }
