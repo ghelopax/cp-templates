@@ -34,44 +34,14 @@ const int LG = 20;
 /*
     Bridge Tree:
     
-    DSU + Tarjan (DFS Tree)
+    Tarjan (DFS Tree)
 */
+
+vector<int> adj[maxN];
 
 void input()
 {
 }
-
-// Disjoint Set Union
-struct DSU
-{
-    int lab[maxN];
-
-    void init(int sz)
-    {
-        fill(lab + 1, lab + sz + 1, -1);
-    }
-
-    int find(int u)
-    {
-        return (lab[u] < 0 ? u : lab[u] = find(lab[u]));
-    }
-
-    bool join(int u, int v)
-    {
-        u = find(u), v = find(v);
-
-        if (u == v)
-            return false;
-
-        if (lab[u] > lab[v])
-            swap(u, v);
-
-        lab[u] += lab[v];
-        lab[v] = u;
-
-        return true;
-    }
-};
 
 namespace Subtask_4
 {
@@ -80,15 +50,13 @@ namespace Subtask_4
         return true;
     }
 
-    // DSU
-    DSU dsu;
-
     // Bridge Tree
     int curid = 0;
     int id[maxN];      // BT nodes ID
     bool vst[maxN];
 
-    vector<int> adj[maxN]; // Some useful infos of BT
+    // Some useful infos of BT
+    vector<int> bt_adj[maxN];
     int deg[maxN];
     int nodesize[maxN];
 
@@ -101,10 +69,10 @@ namespace Subtask_4
             vst[v] = true;
 
             // BT edges
-            if (dsu.join(id[u], id[v]))
+            if (id[u] != id[v])
             {
-                adj[id[u]].pb(id[v]);
-                adj[id[v]].pb(id[u]);
+                bt_adj[id[u]].pb(id[v]);
+                bt_adj[id[v]].pb(id[u]);
 
                 ++deg[id[u]], ++deg[id[v]];
             }
@@ -164,7 +132,6 @@ namespace Subtask_4
         calc(1);
 
         // Build Bridge Tree with BT's root = 1
-        dsu.init(curid);
         vst[1] = true;
         build(1);
     }
