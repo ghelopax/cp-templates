@@ -17,7 +17,7 @@ using namespace std;
 #define ll long long
 #define ldb long double
 
-const int maxN = 1e5 + 5;
+const int maxN = 5e4 + 5;
 const ll MOD = 1e9 + 7;
 const int INF = 1e9;
 const ll INFLL = 4e18;
@@ -56,14 +56,17 @@ void input()
 
 namespace Subtask_1
 {
+    const int maxW = 1e2;
+
     bool constraint()
     {
         return true;
     }
 
     /*
-        Dijkstra's Algorithm in general problems.
-        O((V + E)*logV)
+        Bucket Implementation of Dijkstra's Algorithm in general problems.
+        (Dial's Algorithm)
+        O(E + W*V)
     */
     bool fxd[maxN];
     bool &fixed(Node u)
@@ -71,67 +74,64 @@ namespace Subtask_1
         return fxd[u.id];
     }
 
-    struct Label
+    ll c[maxN];
+    ll &cost(Node u)
     {
-        ll c;
-
-        Label(ll _c) : c(_c) {}
-
-        bool operator>(const Label &o) const
-        {
-            return c > o.c;
-        }
-
-        Label apply(const Nxt &nxt) const
-        {
-            return Label(c + nxt.w);
-        }
-    } lab[maxN];
-    Label &label(Node u)
-    {
-        return lab[u.id];
+        return c[u.id];
     }
 
-    struct State
+    struct Bucket
     {
-        Node u;
-        Label label;
+        queue<Node> q[maxW + 5];
+        int ptr;
+        int size;
 
-        State(Node _u, Label _label) : u(_u), label(_label) {}
+        Bucket() : ptr(0), size(0) {}
 
-        bool operator>(const State &o) const
+        void push(Node u, ll c)
         {
-            return label > o.label;
+            q[c % (maxW + 1)].push(u);
+            ++size;
         }
-    };
 
-    priority_queue<State, vector<State>, greater<State>> pq;
+        Node front()
+        {
+            while (q[ptr].empty()) ptr = (ptr == maxW ? 0 : ptr + 1);
+            return q[ptr].front();
+        }
+
+        void pop()
+        {
+            q[ptr].pop();
+            --size;
+        }
+    } bucket;
+
     void relax(Node u, const Nxt &nxt)
     {
-        Label cur = label(u).apply(nxt);
-        if (label(nxt.to) > cur)
+        if (cost(nxt.to) > cost(u) + nxt.w)
         {
-            label(nxt.to) = cur;
-            pq.emplace(nxt.to, cur);
+            cost(nxt.to) = cost(u) + nxt.w;
+            bucket.push(nxt.to, cost(nxt.to));
         }
     }
 
     void dijkstra(Node src)
     {
-        fill(lab, lab + maxN, Label(INFLL));
+        memset(c, 0x7f, sizeof(c));
         memset(fixed, 0, sizeof(fixed));
-        label(src) = Label(0);
+        cost(src) = 0;
 
-        pq.emplace(src, label(src));
-        while (!pq.empty())
+        bucket.push(src, cost(src));
+        while (bucket.size)
         {
-            State st = pq.top(); pq.pop();
+            Node u = bucket.front(); bucket.pop();
 
-            if (fixed(st.u)) continue;
-            fixed(st.u) = true;
+            if (fixed(u)) continue;
+            fixed(u) = true;
 
-            for (const Nxt &nxt : adj[st.u.id])
-                relax(st.u, nxt);
+            for (const Nxt &nxt : adj[u.id])
+                relax(u, nxt);
         }
     }
 
@@ -142,7 +142,7 @@ namespace Subtask_1
     void solve() // or: void query()
     {
         dijkstra(Node(S));
-        // cout << label(Node(T)).c;
+        // cout << cost(Node(T));
     }
 
     void run()
