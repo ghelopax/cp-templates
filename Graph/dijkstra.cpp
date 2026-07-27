@@ -66,10 +66,7 @@ namespace Subtask_1
         O((V + E)*logV)
     */
     bool fxd[maxN];
-    bool &fixed(Node u)
-    {
-        return fxd[u.id];
-    }
+    bool &fixed(Node u) { return fxd[u.id]; }
 
     struct Label
     {
@@ -87,10 +84,7 @@ namespace Subtask_1
             return Label(c + nxt.w);
         }
     } lab[maxN];
-    Label &label(Node u)
-    {
-        return lab[u.id];
-    }
+    Label &label(Node u) { return lab[u.id]; }
 
     struct State
     {
@@ -126,12 +120,8 @@ namespace Subtask_1
         while (!pq.empty())
         {
             State st = pq.top(); pq.pop();
-
-            if (fixed(st.u)) continue;
-            fixed(st.u) = true;
-
-            for (const Nxt &nxt : adj[st.u.id])
-                relax(st.u, nxt);
+            if (fixed(st.u)) continue; fixed(st.u) = true;
+            for (const Nxt &nxt : adj[st.u.id]) relax(st.u, nxt);
         }
     }
 

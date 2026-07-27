@@ -111,13 +111,11 @@ namespace Subtask_1
         public:
         int cnt;
         stack<Action> history;
-        int old_sz;
 
         void init(int _N)
         {
             memset(lab, -1, sizeof(lab));
             cnt = _N;
-            old_sz = 0;
         }
 
         int findRoot(int u)
@@ -151,8 +149,7 @@ namespace Subtask_1
             ++cnt;
         }
 
-        void snapshot() { old_sz = isz(history); }
-        void restore() { while (isz(history) > old_sz) rollback(); }
+        void restore(int old_sz) { while (isz(history) > old_sz) rollback(); }
     };
 
     int ans[maxN];
@@ -175,7 +172,7 @@ namespace Subtask_1
 
         void dfs(int id, int l, int r)
         {
-            dsu.snapshot();
+            int old_sz = isz(dsu.history);
 
             for (Edge &e : st.ST[id])
                 dsu.join(e.u, e.v);
@@ -188,7 +185,7 @@ namespace Subtask_1
             }
             else ans[l] = dsu.cnt;
 
-            dsu.restore();
+            dsu.restore(old_sz);
         }
     } mng;
 

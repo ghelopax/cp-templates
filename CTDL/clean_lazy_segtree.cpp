@@ -139,14 +139,13 @@ namespace Subtask_1
             }
 
             int mid = MID(l, r);
-
             build(id << 1, l, mid);
             build(id << 1 | 1, mid + 1, r);
 
             ST[id] = ST[id << 1] + ST[id << 1 | 1];
         }
 
-        void down(int id, int l, int r)
+        void push(int id, int l, int r)
         {
             if (LZ[id].empty()) return;
 
@@ -156,7 +155,6 @@ namespace Subtask_1
 
                 ST[id << 1].apply(LZ[id], mid - l + 1);
                 ST[id << 1 | 1].apply(LZ[id], r - mid);
-
                 LZ[id << 1].compose(LZ[id]);
                 LZ[id << 1 | 1].compose(LZ[id]);
             }
@@ -167,7 +165,6 @@ namespace Subtask_1
         void update(int id, int l, int r, int u, int v, Tag t)
         {
             if (r < u || v < l) return;
-
             if (u <= l && r <= v)
             {
                 ST[id].apply(t, r - l + 1);
@@ -175,10 +172,8 @@ namespace Subtask_1
                 return;
             }
 
-            down(id, l, r);
-
+            push(id, l, r);
             int mid = MID(l, r);
-
             update(id << 1, l, mid, u, v, t);
             update(id << 1 | 1, mid + 1, r, u, v, t);
 
@@ -191,14 +186,10 @@ namespace Subtask_1
                 return Node(
                     Data(0)
                 );
+            if (u <= l && r <= v) return ST[id];
 
-            if (u <= l && r <= v)
-                return ST[id];
-
-            down(id, l, r);
-
+            push(id, l, r);
             int mid = MID(l, r);
-
             return get(id << 1, l, mid, u, v) + get(id << 1 | 1, mid + 1, r, u, v);
         }
 

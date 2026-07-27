@@ -39,144 +39,158 @@ vector<int> adj[maxN];
 int sz[maxN];
 int h[maxN];
 int par[maxN];
+int heavy[maxN];
 
 void calc(int u)
 {
     sz[u] = 1;
-
     for (int v : adj[u])
     {
-        if (v == par[u])
-            continue;
-
+        if (v == par[u]) continue;
         h[v] = h[u] + 1;
         par[v] = u;
-
         calc(v);
-
         sz[u] += sz[v];
+        if (sz[heavy[u]] < sz[v]) heavy[u] = v;
     }
 }
 
 // Segment Tree
-ll ST[4 * maxN];
-
 struct Segment_Tree
 {
-    ll *pArr;
-
-    Segment_Tree(ll *p) : pArr(p) {}
+    private:
+    ll *ptr;
+    ll ST[4 * maxN];
+    ll LZ[4 * maxN];
 
     void build(int id, int l, int r)
     {
         if (l == r)
         {
-            ST[id] = pArr[l];
+            ST[id] = ptr[l];
             return;
         }
 
         int mid = MID(l, r);
-
         build(2 * id, l, mid);
         build(2 * id + 1, mid + 1, r);
 
         ST[id] = ST[id << 1] + ST[id << 1 | 1];
     }
 
-    void update(int id, int l, int r, int i, ll v)
+    void down(int id, int l, int r)
     {
+        if (!LZ[id]) return;
+
+        if (l != r)
+        {
+            ST[id << 1] += LZ[id];
+            ST[id << 1 | 1] += LZ[id];
+            LZ[id << 1] += LZ[id];
+            LZ[id << 1 | 1] += LZ[id];
+        }
+
+        LZ[id] = 0;
+    }
+
+    void update(int id, int l, int r, int u, int v, ll w)
+    {
+        if (r < u || v < l) return;
         if (l == r)
         {
-            ST[id] = v;
+            ST[id] += w;
+            LZ[id] += w;
             return;
         }
 
+        down(id, l, r);
         int mid = MID(l, r);
-
-        if (i > mid)
-            update(id << 1 | 1, mid + 1, r, i, v);
-        else
-            update(id << 1, l, mid, i, v);
+        update(id << 1, l, mid, u, v, w);
+        update(id << 1 | 1, mid + 1, r, u, v, w);
 
         ST[id] = ST[id << 1] + ST[id << 1 | 1];
     }
 
     ll get(int id, int l, int r, int u, int v)
     {
-        if (r < u || v < l)
-            return 0;
-        
-        if (u <= l && r <= v)
-            return ST[id];
+        if (r < u || v < l) return 0;
+        if (u <= l && r <= v) return ST[id];
 
+        down(id, l, r);
         int mid = MID(l, r);
-
         return get(id << 1, l, mid, u, v) + get(id << 1 | 1, mid + 1, r, u, v);
+    }
+
+    public:
+    Segment_Tree(ll *_ptr) : ptr(_ptr) {}
+
+    void build()
+    {
+        build(1, 1, n);
+    }
+
+    void update(int l, int r, ll w)
+    {
+        update(1, 1, n, l, r, w);
+    }
+
+    ll get(int l, int r)
+    {
+        return get(1, 1, n, l, r);
     }
 };
 
 // Heavy - Light Decomposition
 // Chain
 int chead[maxN], cid[maxN];
-
+int head(int u) { return chead[cid[u]]; }
 // Flatten
 ll flat[maxN];
 int pos[maxN];
+int ver[maxN];
 
 struct HLD
 {
     int curc, curp;
-    Segment_Tree seg;
+    Segment_Tree st;
 
-    HLD() : curc(1), curp(0), seg(flat) {}
+    HLD() : curc(0), curp(0), st(flat) {}
 
     void build(int u)
     {
-        if (!chead[curc])
-        {
-            chead[curc] = u;
-        }
         cid[u] = curc;
-
         pos[u] = ++curp;
+        ver[pos[u]] = u;
         flat[pos[u]] = val[u];
 
-        int nxt = 0;
-
+        int nxt = heavy[u];
+        if (nxt) build(nxt);
         for (int v : adj[u])
         {
-            if (v == par[u])
-                continue;
-
-            if (sz[nxt] < sz[v])
-                nxt = v;
-        }
-
-        if (!nxt)
-            return;
-
-        build(nxt);
-
-        for (int v : adj[u])
-        {
-            if (v == par[u] || v == nxt)
-                continue;
-            
-            ++curc;
-
+            if (v == par[u] || v == nxt) continue;
+            chead[++curc] = v;
             build(v);
         }
     }
 
-    void preprocess()
+    void init()
     {
+        chead[++curc] = 1;
         build(1);
-        seg.build(1, 1, n);
+        st.build();
     }
 
-    void update(int u, ll val)
+    void update(int u, int v, ll w)
     {
-        seg.update(1, 1, n, pos[u], val);
+        while (cid[u] != cid[v])
+        {
+            if (h[head(u)] < h[head(v)]) swap(u, v);
+            st.update(pos[head(u)], pos[u], w);
+            u = par[head(u)];
+        }
+
+        if (h[u] > h[v]) swap(u, v);
+        st.update(pos[u], pos[v], w);
     }
 
     ll get(int u, int v)
@@ -185,18 +199,13 @@ struct HLD
 
         while (cid[u] != cid[v])
         {
-            if (h[chead[cid[u]]] < h[chead[cid[v]]])
-                swap(u, v);
-
-            res += seg.get(1, 1, n, pos[chead[cid[u]]], pos[u]);
-
-            u = par[chead[cid[u]]];
+            if (h[head(u)] < h[head(v)]) swap(u, v);
+            res += st.get(pos[head(u)], pos[u]);
+            u = par[head(u)];
         }
 
-        if (h[u] > h[v])
-            swap(u, v);
-
-        res += seg.get(1, 1, n, pos[u], pos[v]);
+        if (h[u] > h[v]) swap(u, v);
+        res += st.get(pos[u], pos[v]);
 
         return res;
     }
@@ -204,13 +213,9 @@ struct HLD
 
 void solve()
 {
-    // Build par[], sz[], h[]
     calc(1);
-
     // Build HLD
-    hld.preprocess();
-
-    
+    hld.init();
 }
 
 signed main()

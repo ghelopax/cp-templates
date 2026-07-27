@@ -69,16 +69,9 @@ namespace Subtask_1
         O(E + W*V)
     */
     bool fxd[maxN];
-    bool &fixed(Node u)
-    {
-        return fxd[u.id];
-    }
-
+    bool &fixed(const Node &u) { return fxd[u.id]; }
     ll c[maxN];
-    ll &cost(Node u)
-    {
-        return c[u.id];
-    }
+    ll &cost(const Node &u) { return c[u.id]; }
 
     struct Bucket
     {
@@ -107,7 +100,7 @@ namespace Subtask_1
         }
     } bucket;
 
-    void relax(Node u, const Nxt &nxt)
+    void relax(const Node &u, const Nxt &nxt)
     {
         if (cost(nxt.to) > cost(u) + nxt.w)
         {
@@ -118,7 +111,7 @@ namespace Subtask_1
 
     void dijkstra(Node src)
     {
-        memset(c, 0x7f, sizeof(c));
+        memset(c, 0x3f, sizeof(c));
         memset(fixed, 0, sizeof(fixed));
         cost(src) = 0;
 
@@ -126,12 +119,8 @@ namespace Subtask_1
         while (bucket.size)
         {
             Node u = bucket.front(); bucket.pop();
-
-            if (fixed(u)) continue;
-            fixed(u) = true;
-
-            for (const Nxt &nxt : adj[u.id])
-                relax(u, nxt);
+            if (fixed(u)) continue; fixed(u) = true;
+            for (const Nxt &nxt : adj[u.id]) relax(u, nxt);
         }
     }
 

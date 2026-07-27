@@ -88,6 +88,7 @@ namespace Subtask_1
     // Tree
     int h[maxN];
     int sz[maxN];
+    int heavy[maxN];
 
     // Euler Tour
     int tin[maxN], tout[maxN];
@@ -103,12 +104,10 @@ namespace Subtask_1
         for (int v : adj[u])
         {
             if (v == p) continue;
-
             h[v] = h[u] + 1;
-
             calc(v, u);
-
             sz[u] += sz[v];
+            if (sz[heavy[u]] < sz[v]) heavy[u] = v;
         }
 
         tout[u] = timer;
@@ -140,34 +139,35 @@ namespace Subtask_1
         if (cnt[c[u]]) ft.update(cnt[c[u]], 1);
     }
 
-    void query(int u, int p, bool heavy)
+    /*
+    query(u, p):
+        query(light child)
+        query(heavy child)
+        for (light child) add subtree(light child)
+        add u
+        answer queries of subtree(u)
+        remove subtree(u) if u is not the heavy child of p
+    */
+    void query(int u, int p)
     {
-        int nxt = 0;
-        for (int v : adj[u])
-        {
-            if (v == p) continue;
-            if (sz[nxt] < sz[v]) nxt = v;
-        }
-
+        int nxt = heavy[u];
         for (int v : adj[u])
         {
             if (v == p || v == nxt) continue;
-            query(v, u, false);
+            query(v, u);
         }
-        if (nxt) query(nxt, u, true);
-
+        if (nxt) query(nxt, u);
         for (int v : adj[u])
         {
             if (v == p || v == nxt) continue;
             FOR(t, tin[v], tout[v]) add(ver[t]);
         }
-
         add(u);
 
         for (Query qr : queries[u])
             ans[qr.id] = (qr.k > N ? 0 : ft.get(N) - (qr.k > 1 ? ft.get(qr.k - 1) : 0));
 
-        if (!heavy) FOR(t, tin[u], tout[u]) rem(ver[t]);
+        if (u != heavy[p]) FOR(t, tin[u], tout[u]) rem(ver[t]);
     }
 
     void preprocess()
@@ -190,7 +190,7 @@ namespace Subtask_1
     {
         preprocess();
         FOR(i, 0, Q - 1) getQuery(i);
-        query(1, 0, false);
+        query(1, 0);
         FOR(i, 0, Q - 1) cout << ans[i] << el;
     }
 }
