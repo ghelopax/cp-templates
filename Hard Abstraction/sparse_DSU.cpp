@@ -38,6 +38,16 @@ const int LG = 20;
 #define FOR(i, l, r) for (int i = (l); i <= (int)(r); ++i)
 #define FORLL(i, l, r) for (ll i = (l); i <= (ll)(r); ++i)
 
+void minimize(int &x, int w)
+{
+    if (x > w) x = w;
+}
+
+void maximize(int &x, int w)
+{
+    if (x < w) x = w;
+}
+
 int N, Q;
 
 void input()
@@ -45,88 +55,84 @@ void input()
     cin >> N >> Q;
 }
 
-namespace Subtask_3
-{
-    const int maxN = 1e3 + 5;
+// namespace Subtask_3
+// {
+//     const int maxN = 1e3 + 5;
 
-    bool constraint()
-    {
-        return N <= 1e3 && Q <= 1e3;
-    }
+//     bool constraint()
+//     {
+//         return N <= 1e3 && Q <= 1e3;
+//     }
 
-    struct DSU
-    {
-        int lab[maxN];
-        int lf[maxN];
-        int rg[maxN];
+//     struct DSU
+//     {
+//         int lab[maxN];
+//         int lf[maxN];
+//         int rg[maxN];
 
-        void init(int _N)
-        {
-            FOR(i, 1, N) lab[i] = -1, lf[i] = rg[i] = i;
-        }
+//         void init(int _N)
+//         {
+//             FOR(i, 1, N) lab[i] = -1, lf[i] = rg[i] = i;
+//         }
 
-        int find(int u)
-        {
-            return (lab[u] < 0 ? u : lab[u] = find(lab[u]));
-        }
+//         int find(int u)
+//         {
+//             return (lab[u] < 0 ? u : lab[u] = find(lab[u]));
+//         }
 
-        bool join(int u, int v)
-        {
-            int add[2] = {u, v};
-            u = find(u), v = find(v);
+//         bool join(int u, int v)
+//         {
+//             u = find(u), v = find(v);
 
-            if (u == v) return false;
+//             if (u == v) return false;
 
-            if (lab[u] < lab[v]) swap(u, v);
+//             if (lab[u] < lab[v]) swap(u, v);
 
-            lab[u] += lab[v];
-            lab[v] = u;
-            lf[u] = min(lf[u], lf[v]);
-            rg[u] = max(rg[u], rg[v]);
+//             lab[u] += lab[v];
+//             lab[v] = u;
+            
+//             minimize(lf[u], lf[v]);
+//             maximize(rg[u], rg[v]);
 
-            // cerr << u << ": " << add[0] << ' ' << add[1] << ' ' << lf[u] << el;
-            lf[u] = min({add[0], add[1], lf[u]});
-            rg[u] = max({add[0], add[1], rg[u]});
+//             return true;
+//         }
+//     } dsu;
 
-            return true;
-        }
-    } dsu;
+//     void preprocess()
+//     {
+//         dsu.init(N);
+//     }
 
-    void preprocess()
-    {
-        dsu.init(N);
-    }
+//     void query()
+//     {
+//         char type; cin >> type;
 
-    void query()
-    {
-        char type; cin >> type;
+//         if (type == '1')
+//         {
+//             int x; cin >> x;
 
-        if (type == '1')
-        {
-            int x; cin >> x;
+//             int r = dsu.find(x);
 
-            int r = dsu.find(x);
+//             cout << dsu.lf[r] << ' ' << dsu.rg[r] << el;
+//         }
+//         else
+//         {
+//             int l, r, len;
+//             cin >> l >> r >> len;
 
-            cout << dsu.lf[r] << ' ' << dsu.rg[r] << el;
-        }
-        else
-        {
-            int l, r, len;
-            cin >> l >> r >> len;
+//             FOR(i, 0, len - 1)
+//             {
+//                 dsu.join(l + i, r + i);
+//             }
+//         }
+//     }
 
-            FOR(i, 0, len - 1)
-            {
-                dsu.join(l + i, r + i);
-            }
-        }
-    }
-
-    void run()
-    {
-        preprocess();
-        while(Q--) query();
-    }
-}
+//     void run()
+//     {
+//         preprocess();
+//         while(Q--) query();
+//     }
+// }
 
 namespace Subtask_6
 {
@@ -143,10 +149,10 @@ namespace Subtask_6
         int lf[maxN];
         int rg[maxN];
 
-        void init()
+        void init(int _N)
         {
             memset(lab, -1, sizeof(lab));
-            FOR(i, 1, N) lf[i] = rg[i] = i;
+            FOR(i, 1, _N) lf[i] = rg[i] = i;
         }
 
         int find(int u)
@@ -156,21 +162,17 @@ namespace Subtask_6
 
         bool join(int u, int v)
         {
-            int add[2] = {u, v};
             u = find(u), v = find(v);
 
             if (u == v) return false;
 
-            if (lab[u] < lab[v]) swap(u, v);
+            if (lab[u] > lab[v]) swap(u, v);
 
             lab[u] += lab[v];
             lab[v] = u;
-            lf[u] = min(lf[u], lf[v]);
-            rg[u] = max(rg[u], rg[v]);
-
-            // cerr << u << ": " << add[0] << ' ' << add[1] << ' ' << lf[u] << el;
-            lf[u] = min({add[0], add[1], lf[u]});
-            rg[u] = max({add[0], add[1], rg[u]});
+            
+            minimize(lf[u], lf[v]);
+            maximize(rg[u], rg[v]);
 
             return true;
         }
@@ -187,7 +189,7 @@ namespace Subtask_6
 
         void init()
         {
-            FOR(k, 0, LG) dsu[k].init();
+            FOR(k, 0, LG) dsu[k].init(N);
         }
 
         void update(int u, int v, int k)
@@ -266,7 +268,7 @@ signed main()
 
     input();
 
-    if (Subtask_3::constraint()) return Subtask_3::run(), 0;
+    // if (Subtask_3::constraint()) return Subtask_3::run(), 0;
     if (Subtask_6::constraint()) return Subtask_6::run(), 0;
 
     return 0;

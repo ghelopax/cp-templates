@@ -16,7 +16,7 @@ using namespace std;
 
 /*
     QOJ
-    NOI 2026 Final - Task 4: Gemstones
+    Singapore NOI 2026 Final - Task 4: Gemstones
 */
 
 #define ll long long
@@ -57,7 +57,6 @@ namespace Subtask_9
 
     struct Tree
     {
-        private:
         int sz;
         int *par;
         vector<int> child[maxN];
@@ -78,7 +77,6 @@ namespace Subtask_9
             }
         }
 
-        public:
         void init(int *_par, int _sz)
         {
             par = _par;
@@ -86,12 +84,8 @@ namespace Subtask_9
             memset(h, 0, sizeof(h));
 
             FOR(u, 1, sz)
-            {
                 if (par[u] != 0)
-                {
                     child[par[u]].pb(u);
-                }
-            }
 
             calc(1);
         }
@@ -99,42 +93,23 @@ namespace Subtask_9
         int LCA(int u, int v)
         {
             if (h[u] < h[v]) swap(u, v);
-
             int k = h[u] - h[v];
             FOR(j, 0, LG)
-            {
-                if (BIT(k, j)) 
-                {
+                if (BIT(k, j))   
                     u = up[u][j];
-        
-                }
-            }
 
             if (u == v) return u;
 
             for (int j = LG; j >= 0; --j)
-            {
-                if (up[u][j] != up[v][j])
-                {
+                if (up[u][j] != up[v][j])     
                     u = up[u][j], v = up[v][j];
-                }
-            }
-
+            
             return up[u][0];
         }
 
         int dist(int u, int v)
         {
             return h[u] + h[v] - 2 * h[LCA(u, v)];
-        }
-
-        void print()
-        {
-            FOR(u, 1, sz) cout << par[u] << ' ';
-            cout << el;
-
-            FOR(u, 1, sz) cout << h[u] << ' ';
-            cout << el;
         }
     };
 
@@ -184,21 +159,11 @@ namespace Subtask_9
         {
             return tree.dist(state[l - 1], state[r]);
         }
-
-        void printTree() { tree.print(); }
-        void printID() 
-        {
-            FOR(i, 0, n)
-                cout << state[i] << ' ';
-            cout << el;
-        }
     } mng;
 
     void preprocess()
     {
         mng.build(c);
-        // mng.printID();
-        // mng.printTree();
     }
 
     void query()

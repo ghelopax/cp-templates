@@ -55,7 +55,7 @@ void calc(int u)
     }
 }
 
-// Segment Tree
+// Segment Tree (Lazy Propagation)
 struct Segment_Tree
 {
     private:
@@ -141,25 +141,25 @@ struct Segment_Tree
 };
 
 // Heavy - Light Decomposition
-// Chain
-int chead[maxN], cid[maxN];
-int head(int u) { return chead[cid[u]]; }
-// Flatten
-ll flat[maxN];
-int pos[maxN];
-int ver[maxN];
-
 struct HLD
 {
-    int curc, curp;
+    // Chain
+    int chead[maxN], cid[maxN];
+    int head(int u) { return chead[cid[u]]; }
+    // Flatten
+    ll flat[maxN];
+    int pos[maxN];
+    int ver[maxN];
     Segment_Tree st;
-
-    HLD() : curc(0), curp(0), st(flat) {}
+    
+    int cur, timer;
+    
+    HLD() : cur(0), timer(0), st(flat) {}
 
     void build(int u)
     {
-        cid[u] = curc;
-        pos[u] = ++curp;
+        cid[u] = cur;
+        pos[u] = ++timer;
         ver[pos[u]] = u;
         flat[pos[u]] = val[u];
 
@@ -168,14 +168,14 @@ struct HLD
         for (int v : adj[u])
         {
             if (v == par[u] || v == nxt) continue;
-            chead[++curc] = v;
+            chead[++cur] = v;
             build(v);
         }
     }
 
     void init()
     {
-        chead[++curc] = 1;
+        chead[++cur] = 1;
         build(1);
         st.build();
     }
