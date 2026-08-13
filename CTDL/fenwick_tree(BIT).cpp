@@ -17,7 +17,7 @@ using namespace std;
 #define ll long long
 #define ldb long double
 
-const int maxN = 1e5 + 5;
+const int maxN = 2e5 + 5;
 const int MOD = 1e9 + 7;
 const int INF = 2e9;
 const ll INFLL = 4e18;
@@ -47,20 +47,20 @@ struct BIT
     {
         ll res = 0; for (; i > 0; i -= lsb(i)) res += bit[i]; return res;
     }
-    
+
     // Binary Lifting
     // Monotonic prefix sum only
     ll lb(ll w) // first pos: sum[1...i] >= w
     {
         int pos = 0;
         ll sum = 0;
-        
+
         for (int idx = LG; idx >= 0; --idx)
         {
             int nxt = pos + (1 << idx);
             if (nxt >= maxN) continue;
 
-            if (sum + bit[nxt] < w) 
+            if (sum + bit[nxt] < w)
             {
                 pos = nxt;
                 sum += bit[nxt];
@@ -91,7 +91,7 @@ struct RangeBIT
     void update(int l, int r, ll w)
     {
         update(l, w);
-        
+
         if (r + 1 <= N)
             update(r + 1, -w);
     }
