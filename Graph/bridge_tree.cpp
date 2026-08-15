@@ -16,9 +16,8 @@ using namespace std;
 
 #define ll long long
 #define ldb long double
-#define pii pair<int, int>
 
-const int maxN = 2e5 + 5;
+const int maxN = 1e5 + 5;
 const ll MOD = 1e9 + 7;
 const int INF = 1e9;
 const ll INFLL = 4e18;
@@ -28,124 +27,115 @@ const int LG = 20;
 #define pb push_back
 #define eb emplace_back
 #define MASK(i) (1LL << (i))
+#define BIT(msk, i) (((msk) >> (i)) & 1LL)
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 #define lsb(x) ((x) & -(x))
+#define FOR(i, l, r) for (int i = (l); i <= (int)(r); ++i)
+#define FORLL(i, l, r) for (ll i = (l); i <= (ll)(r); ++i)
+#define isz(v) (int)v.size()
 
-/*
-    Bridge Tree:
-    
-    Tarjan (DFS Tree)
-*/
+struct Edge
+{
+    int u, v;
 
-vector<int> adj[maxN];
+    Edge(int _u, int _v) : u(_u), v(_v) {}
+};
+
+int n, m;
+
+struct Graph
+{
+    vector<int> adj[maxN];
+    vector<Edge> edges;
+
+    void addEdge(int u, int v)
+    {
+        adj[u].pb(v);
+        adj[v].pb(u);
+        edges.eb(u, v);
+    }
+} G;
 
 void input()
 {
+    cin >> n >> m;
+
+    for (int u, v, i = 0; i < m; ++i)
+    {
+        cin >> u >> v;
+        G.addEdge(u, v);
+    }
 }
 
-namespace Subtask_4
+// Bridge Tree
+struct BridgeTree
 {
-    bool constraint()
-    {
-        return true;
-    }
-
-    // Bridge Tree
-    int curid = 0;
-    int id[maxN];      // BT nodes ID
-    bool vst[maxN];
-
-    // Some useful infos of BT
-    vector<int> bt_adj[maxN];
-    int deg[maxN];
+    int cur;
+    int id[maxN];
     int nodesize[maxN];
+    vector<int> adj[maxN];
 
-    void build(int u)
+    BridgeTree() : cur(0) {}
+
+    void addEdge(int u, int v)
     {
-        for (int v : adj[u])
+        adj[u].pb(v);
+        adj[v].pb(u);
+    }
+
+    void build()
+    {
+        for (const Edge &e : G.edges)
+            if (id[e.u] != id[e.v])
+                addEdge(id[e.u], id[e.v]);
+    }
+} BT;
+
+// DFS Tree of G
+int tin[maxN];
+int low[maxN];
+int timer = 0;
+bool del[maxN]; // Tarjan
+stack<int> st;
+
+void calc(int u, int p = 0)
+{
+    tin[u] = low[u] = ++timer;
+    st.push(u);
+
+    for (int v : G.adj[u])
+    {
+        if (del[v]) continue;
+        if (v == p) continue;
+
+        if (tin[v]) low[u] = min(low[u], tin[v]);
+        else
         {
-            if (vst[v]) continue;
-
-            vst[v] = true;
-
-            // BT edges
-            if (id[u] != id[v])
-            {
-                bt_adj[id[u]].pb(id[v]);
-                bt_adj[id[v]].pb(id[u]);
-
-                ++deg[id[u]], ++deg[id[v]];
-            }
-
-            build(v);
+            calc(v, u);
+            low[u] = min(low[u], low[v]);
         }
     }
 
-    // DFS Tree
-    int timer = 0;
-    int num[maxN], low[maxN];
-
-    // Tarjan
-    stack<int> st;
-    bool del[maxN];
-
-    void calc(int u, int p = 0)
+    if (low[u] == tin[u])
     {
-        num[u] = low[u] = ++timer;
-        st.push(u);
-
-        for (int v : adj[u])
+        ++BT.cur;
+        int v;
+        do
         {
-            if (del[v]) continue;
-            if (v == p) continue;
+            v = st.top(); st.pop();
 
-            if (!num[v])
-            {
-                calc(v, u);
-
-                low[u] = min(low[u], low[v]);
-            }
-            else low[u] = min(low[u], num[v]);
+            ++BT.nodesize[BT.cur];
+            BT.id[v] = BT.cur;
+            del[v] = true;
         }
-
-        // BT nodes
-        if (low[u] == num[u])
-        {
-            ++curid;
-            int v;
-
-            do
-            {
-                v = st.top(); st.pop();
-
-                ++nodesize[curid];
-                id[v] = curid;
-                del[v] = true;
-            }
-            while (v != u);
-        }
+        while (v != u);
     }
+}
 
-    void preprocess()
-    {
-        // Tarjan with root = 1
-        calc(1);
-
-        // Build Bridge Tree with BT's root = 1
-        vst[1] = true;
-        build(1);
-    }
-
-    void solve()
-    {
-        
-    }
-
-    void run()
-    {
-        preprocess();
-        solve();
-    }
+void preprocess()
+{
+    calc(1);
+    BT.build();
 }
 
 signed main()
@@ -153,13 +143,13 @@ signed main()
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     cout.tie(nullptr);
-
-    // freopen(".inp", "r", stdin);
-    // freopen(".out", "w", stdout);
+    
+    freopen("main.inp", "r", stdin);
+    freopen("main.out", "w", stdout);
 
     input();
 
-    if (Subtask_4::constraint()) return Subtask_4::run(), 0;
+    preprocess();
 
     return 0;
 }
