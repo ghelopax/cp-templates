@@ -67,8 +67,11 @@ signed main()
     cin.tie(nullptr);
     cout.tie(nullptr);
 
-    // freopen(".inp", "r", stdin);
-    // freopen(".out", "w", stdout);
+    if (fopen("main.inp", "r"))
+    {
+        freopen("main.inp", "r", stdin);
+        freopen("main.out", "w", stdout);
+    }
 
     input();
 
