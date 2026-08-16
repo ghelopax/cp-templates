@@ -1,10 +1,10 @@
 @echo off
 
-call compile.bat sol
+call build.bat sol
 if %errorlevel% neq 0 exit /b
-call compile.bat main
+call build.bat main
 if %errorlevel% neq 0 exit /b
-call compile.bat gen
+call build.bat gen
 if %errorlevel% neq 0 exit /b
 
 set TC=10

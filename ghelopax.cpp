@@ -14,6 +14,8 @@ using namespace std;
  > ^ <  > ^ <  > ^ <  > ^ <
 */
 
+#define NAME "main"
+
 #define ll long long
 #define ldb long double
 
@@ -67,10 +69,10 @@ signed main()
     cin.tie(nullptr);
     cout.tie(nullptr);
 
-    if (fopen("main.inp", "r"))
+    if (fopen(NAME".inp", "r"))
     {
-        freopen("main.inp", "r", stdin);
-        freopen("main.out", "w", stdout);
+        freopen(NAME".inp", "r", stdin);
+        freopen(NAME".out", "w", stdout);
     }
 
     input();
