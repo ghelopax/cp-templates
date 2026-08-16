@@ -10,7 +10,6 @@ if %errorlevel% neq 0 exit /b
 set TC=10
 set i=0
 :loop
-echo TEST %i%
 gen.exe
 main.exe
 sol.exe
