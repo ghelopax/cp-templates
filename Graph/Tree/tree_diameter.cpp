@@ -16,6 +16,7 @@ using namespace std;
 
 #define ll long long
 #define ldb long double
+#define pii pair<int, int>
 
 const int maxN = 1e5 + 5;
 const int MOD = 1e9 + 7;
@@ -29,53 +30,43 @@ const ll INFLL = 4e18;
 #define MID(l, r) ((l) + (((r) - (l)) >> 1))
 
 // Tree Diameter
-pair<int, int> dmax(vector<int> *_adj, int _N, int s)
-{
-    pair<int, int> res = {-1, 0};
-
-    vector<bool> _vst(_N + 1, false);
-    queue<pair<int, int>> q;
-
-    _vst[s] = true;
-    q.emplace(s, 0);
-
-    while (!q.empty())
+    pii farthest(vector<int> *_adj, int _N, int s)
     {
-        int u, du;
-        tie(u, du) = q.front();
-        q.pop();
+        pii res(-1, 0);
 
-        if (res.second < du)
-        {
-            res = {u, du};
-        }
+        vector<bool> _vst(_N + 1, 0);
+        queue<pii> q;
+        q.emplace(s, 0);
+        _vst[s] = true;
 
-        for (int v : _adj[u])
+        while (!q.empty())
         {
-            if (!_vst[v])
+            int u, du;
+            tie(u, du) = q.front(); q.pop();
+
+            if (res.second < du)
             {
-                _vst[v] = true;
+                res.second = du;
+                res.first = u;
+            }
 
+            for (const int &v : _adj[u])
+            {
+                if (_vst[v]) continue;
+                _vst[v] = true;
                 q.emplace(v, du + 1);
             }
         }
+
+        return res;
     }
 
-    return res;
-}
-
-int diameter(vector<int> *_adj, int _N, int root)
-{
-    int A = dmax(_adj, _N, root).first;
-
-    if (A == -1)
-        return 0;
-
-    int B, res;
-    tie(B, res) = dmax(_adj, _N, A);
-
-    return res;
-}
+    int diameter(vector<int> *_adj, int _N)
+    {
+        int A = farthest(_adj, _N, 1).first;
+        if (A == -1) return 0;
+        return farthest(_adj, _N, A).second;
+    }
 
 signed main()
 {
