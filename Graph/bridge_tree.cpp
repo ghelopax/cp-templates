@@ -14,10 +14,17 @@ using namespace std;
  > ^ <  > ^ <  > ^ <  > ^ <
 */
 
+/*
+    Codeforces 1000E
+*/
+
+#define NAME "main"
+
 #define ll long long
 #define ldb long double
+#define pii pair<int, int>
 
-const int maxN = 1e5 + 5;
+const int maxN = 3e5 + 5;
 const ll MOD = 1e9 + 7;
 const int INF = 1e9;
 const ll INFLL = 4e18;
@@ -67,75 +74,139 @@ void input()
     }
 }
 
-// Bridge Tree
-struct BridgeTree
+namespace Subtask_1
 {
-    int cur;
-    int id[maxN];
-    int nodesize[maxN];
-    vector<int> adj[maxN];
-
-    BridgeTree() : cur(0) {}
-
-    void addEdge(int u, int v)
+    bool constraint()
     {
-        adj[u].pb(v);
-        adj[v].pb(u);
+        return true;
     }
 
-    void build()
+    // Tree Diameter
+    pii farthest(vector<int> *_adj, int _N, int s)
     {
-        for (const Edge &e : G.edges)
-            if (id[e.u] != id[e.v])
-                addEdge(id[e.u], id[e.v]);
-    }
-} BT;
+        pii res(-1, 0);
 
-// DFS Tree of G
-int tin[maxN];
-int low[maxN];
-int timer = 0;
-bool del[maxN]; // Tarjan
-stack<int> st;
+        vector<bool> _vst(_N + 1, 0);
+        queue<pii> q;
+        q.emplace(s, 0);
+        _vst[s] = true;
 
-void calc(int u, int p = 0)
-{
-    tin[u] = low[u] = ++timer;
-    st.push(u);
-
-    for (int v : G.adj[u])
-    {
-        if (del[v]) continue;
-        if (v == p) continue;
-
-        if (tin[v]) low[u] = min(low[u], tin[v]);
-        else
+        while (!q.empty())
         {
-            calc(v, u);
-            low[u] = min(low[u], low[v]);
+            int u, du;
+            tie(u, du) = q.front(); q.pop();
+
+            if (res.second < du)
+            {
+                res.second = du;
+                res.first = u;
+            }
+
+            for (const int &v : _adj[u])
+            {
+                if (_vst[v]) continue;
+                _vst[v] = true;
+                q.emplace(v, du + 1);
+            }
+        }
+
+        return res;
+    }
+
+    int diameter(vector<int> *_adj, int _N)
+    {
+        int A = farthest(_adj, _N, 1).first;
+        if (A == -1) return 0;
+        return farthest(_adj, _N, A).second;
+    }
+
+    struct BridgeTree
+    {
+        int cur;
+        int id[maxN];
+        vector<int> adj[maxN];
+
+        BridgeTree() : cur(0) {}
+
+        void addEdge(int u, int v)
+        {
+            adj[u].pb(v);
+            adj[v].pb(u);
+        }
+
+        void init()
+        {
+            for (const Edge &e : G.edges)
+                if (id[e.u] != id[e.v])
+                    addEdge(id[e.u], id[e.v]);
+        }
+    } BT;
+
+    // DFS Tree of G
+    int tin[maxN];
+    int low[maxN];
+    int timer;
+    // Tarjan
+    bool del[maxN];
+    stack<int> st;
+
+    void dfs(int u, int p = 0)
+    {
+        tin[u] = low[u] = ++timer;
+        st.push(u);
+
+        for (const int &v : G.adj[u])
+        {
+            if (del[v]) continue;
+            if (v == p) continue;
+
+            if (tin[v]) low[u] = min(low[u], tin[v]);
+            else
+            {
+                dfs(v, u);
+                low[u] = min(low[u], low[v]);
+            }
+        }
+
+        if (low[u] == tin[u])
+        {
+            ++BT.cur;
+            int v;
+            do
+            {
+                v = st.top(); st.pop();
+
+                BT.id[v] = BT.cur;
+            }
+            while (v != u);
         }
     }
 
-    if (low[u] == tin[u])
+    void preprocess()
     {
-        ++BT.cur;
-        int v;
-        do
-        {
-            v = st.top(); st.pop();
-
-            ++BT.nodesize[BT.cur];
-            BT.id[v] = BT.cur;
-            del[v] = true;
-        }
-        while (v != u);
+        timer = 0;
+        dfs(1);
+        BT.init();
     }
-}
 
-void preprocess()
-{
-    calc(1);
-    BT.build();
+    void solve() // or: void query()
+    {
+        // FOR(i, 1, BT.cur)
+        // {
+        //     cerr << i << ": ";
+        //     for (const int &v : BT.adj[i])
+        //         cerr << v << ' ';
+        //     cerr << el;
+        // }
+
+        cout << diameter(BT.adj, BT.cur);
+    }
+
+    void run()
+    {
+        preprocess();
+        solve(); // or: while(Q--) query();
+    }
 }
 
 signed main()
@@ -143,13 +214,16 @@ signed main()
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     cout.tie(nullptr);
-    
-    freopen("main.inp", "r", stdin);
-    freopen("main.out", "w", stdout);
+
+    if (fopen(NAME".inp", "r"))
+    {
+        freopen(NAME".inp", "r", stdin);
+        freopen(NAME".out", "w", stdout);
+    }
 
     input();
 
-    preprocess();
+    if (Subtask_1::constraint()) return Subtask_1::run(), 0;
 
     return 0;
 }
