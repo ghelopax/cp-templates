@@ -46,6 +46,7 @@ namespace Subtask_1
 {
     bool constraint()
     {
+        return true;
     }
 
     void preprocess()
